@@ -40,6 +40,8 @@ weekly diff gives us per-week lines without needing per-event box scores.
 
 ```
 src/collect.js        # Playwright collector → writes a weekly snapshot
+src/site.js           # static-site builder → renders summaries/ into dist/ (the magazine)
+src/magazine.css      # magazine stylesheet (copied to dist/style.css on build)
 src/probe*.js         # one-off discovery scripts (kept for debugging)
 data/snapshots/<date>/
   standings.json      # parsed standings
@@ -63,8 +65,12 @@ npm run weekly                     # collect snapshot → deterministic summary 
 npm run collect                    # writes data/snapshots/<today>/
 npm run summary                    # writes summaries/<today>.md (deterministic; no API key needed)
 npm run article                    # writes summaries/<today>-article.md (AI-written; needs API key)
+npm run site                       # builds the magazine into dist/ (no API key needed)
 node src/article.js 2026-06-29     # render a specific snapshot as "latest"
 ```
+
+`npm run weekly` now ends by building the site, so a normal run produces the
+snapshot, both markdown outputs, **and** the rebuilt `dist/`.
 
 **Run it Sunday or Monday**, after the weekend stats analysis lands. Each run
 produces two outputs from the same snapshot data:
@@ -94,3 +100,25 @@ per-week lines kick in on the second run.
 ### Possible next steps
 - Auto-email the article each week (your Gmail is connected to Claude Code).
 - Tune the article's voice/length in `src/article.js` (system prompt + `effort`).
+
+## Publishing (the magazine)
+
+Each week becomes an **issue**: the AI article is the feature column and the
+deterministic summary is reproduced below it as "The Record" (box scores,
+standings, stat leaders). `src/site.js` renders `summaries/*.md` into a static
+magazine in `dist/` — plain HTML + one stylesheet, no framework.
+
+`dist/` is a build artifact (gitignored). It's published to **GitHub Pages** by
+`.github/workflows/pages.yml`, which runs on every push to `main`: it builds the
+site from the committed markdown and deploys it. So the weekly rhythm is:
+
+```bash
+npm run weekly          # collect → summary → article → site
+git add summaries/      # commit the week's new markdown
+git commit -m "Issue: week of <date>"
+git push                # the Action rebuilds dist/ and deploys to Pages
+```
+
+One-time setup: in the repo's **Settings → Pages**, set **Source: GitHub
+Actions**. After the first successful run the site is live at
+`https://<user>.github.io/<repo>/`.
