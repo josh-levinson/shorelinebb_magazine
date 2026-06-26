@@ -1,0 +1,110 @@
+[
+  {
+    "event_id": "3717976",
+    "date": "Wed Jun 24, 2026",
+    "time": "8:00 PM - 8:45 PM",
+    "ts": 1782352800,
+    "location": "East Shoreline Catholic Academy",
+    "home": {
+      "team_id": 852784,
+      "name": "Black Mamba",
+      "score": null
+    },
+    "away": {
+      "team_id": 890772,
+      "name": "Green Wave",
+      "score": null
+    },
+    "final": false
+  },
+  {
+    "event_id": "3717977",
+    "date": "Wed Jun 24, 2026",
+    "time": "7:00 PM - 7:45 PM",
+    "ts": 1782349200,
+    "location": "East Shoreline Catholic Academy",
+    "home": {
+      "team_id": 852783,
+      "name": "Knicks",
+      "score": null
+    },
+    "away": {
+      "team_id": 852782,
+      "name": "Huskies",
+      "score": null
+    },
+    "final": false
+  },
+  {
+    "event_id": "3717978",
+    "date": "Wed Jun 24, 2026",
+    "time": "6:00 PM - 6:45 PM",
+    "ts": 1782345600,
+    "location": "East Shoreline Catholic Academy",
+    "home": {
+      "team_id": 852781,
+      "name": "Bulldogs",
+      "score": null
+    },
+    "away": {
+      "team_id": 852780,
+      "name": "Red Storm",
+      "score": null
+    },
+    "final": false
+  },
+  {
+    "event_id": "3717975",
+    "date": "Wed Jun 17, 2026",
+    "time": "8:00 PM - 8:45 PM",
+    "ts": 1781748000,
+    "location": "East Shoreline Catholic Academy",
+    "home": {
+      "team_id": 852782,
+      "name": "Huskies",
+      "score": 57
+    },
+    "away": {
+      "team_id": 890772,
+      "name": "Green Wave",
+      "score": 48
+    },
+    "final": true
+  },
+  {
+    "event_id": "3717974",
+    "date": "Wed Jun 17, 2026",
+    "time": "7:00 PM - 7:45 PM",
+    "ts": 1781744400,
+    "location": "East Shoreline Catholic Academy",
+    "home": {
+      "team_id": 852781,
+      "name": "Bulldogs",
+      "score": 44
+    },
+    "away": {
+      "team_id": 852784,
+      "name": "Black Mamba",
+      "score": 41
+    },
+    "final": true
+  },
+  {
+    "event_id": "3717973",
+    "date": "Wed Jun 17, 2026",
+    "time": "6:00 PM - 6:45 PM",
+    "ts": 1781740800,
+    "location": "East Shoreline Catholic Academy",
+    "home": {
+      "team_id": 852780,
+      "name": "Red Storm",
+      "score": 43
+    },
+    "away": {
+      "team_id": 852783,
+      "name": "Knicks",
+      "score": 40
+    },
+    "final": true
+  }
+]

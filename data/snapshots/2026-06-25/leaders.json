@@ -1,0 +1,92 @@
+[
+  {
+    "statistic_id": 11059461,
+    "players": [
+      {
+        "name": "Ryan Florentine",
+        "team": "Huskies",
+        "value": 23
+      },
+      {
+        "name": "Jeremy McDonald",
+        "team": "Green Wave",
+        "value": 18
+      },
+      {
+        "name": "Khalid Jabarkhail",
+        "team": "Bulldogs",
+        "value": 18
+      },
+      {
+        "name": "Taylor Houghton",
+        "team": "Knicks",
+        "value": 17
+      },
+      {
+        "name": "Jimmy Girolamo",
+        "team": "Green Wave",
+        "value": 16
+      }
+    ]
+  },
+  {
+    "statistic_id": 11059465,
+    "players": [
+      {
+        "name": "Jeremy McDonald",
+        "team": "Green Wave",
+        "value": 5
+      },
+      {
+        "name": "Dimitrios Varrias",
+        "team": "Bulldogs",
+        "value": 4
+      },
+      {
+        "name": "Brian Jackson",
+        "team": "Knicks",
+        "value": 4
+      },
+      {
+        "name": "Colby Morawski",
+        "team": "Black Mamba",
+        "value": 4
+      },
+      {
+        "name": "Ryan Florentine",
+        "team": "Huskies",
+        "value": 3
+      }
+    ]
+  },
+  {
+    "statistic_id": 11059450,
+    "players": [
+      {
+        "name": "Scott Houghton",
+        "team": "Huskies",
+        "value": 1
+      },
+      {
+        "name": "Mike Iannuzzi",
+        "team": "Black Mamba",
+        "value": 1
+      },
+      {
+        "name": "Samim Jabarkhail",
+        "team": "Black Mamba",
+        "value": 1
+      },
+      {
+        "name": "Joshua Levinson",
+        "team": "Black Mamba",
+        "value": 1
+      },
+      {
+        "name": "Colby Morawski",
+        "team": "Black Mamba",
+        "value": 1
+      }
+    ]
+  }
+]

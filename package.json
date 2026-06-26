@@ -1,0 +1,21 @@
+{
+  "name": "shorelinebb",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Weekly summary generator for the Shoreline men's basketball league (TeamLinkt)",
+  "scripts": {
+    "collect": "node src/collect.js",
+    "summary": "node src/summarize.js",
+    "article": "node src/article.js",
+    "site": "node src/site.js",
+    "weekly": "node src/collect.js && node src/summarize.js && node src/article.js && node src/site.js"
+  },
+  "devDependencies": {
+    "playwright": "^1.61.1"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.106.0",
+    "markdown-it": "^14.2.0"
+  }
+}

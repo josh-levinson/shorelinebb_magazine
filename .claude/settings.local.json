@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:leagues.teamlinkt.com)",
+      "WebFetch(domain:app.teamlinkt.com)",
+      "WebFetch(domain:api.teamlinkt.com)",
+      "Bash(npx playwright *)",
+      "Bash(node src/probe.js)",
+      "Bash(curl -s -o /dev/null -w 'HTTP %{http_code}  %{size_download}b  ct=%{content_type}\\\\n' -H 'X-Requested-With: XMLHttpRequest' -H 'User-Agent: Mozilla/5.0 \\(Macintosh; Intel Mac OS X 10_15_7\\) AppleWebKit/537.36 Chrome/120.0 Safari/537.36' https://leagues.teamlinkt.com/leagues/getStandings/10372/54723)",
+      "Bash(curl -s -o /dev/null -w 'HTTP %{http_code}  %{size_download}b  ct=%{content_type}\\\\n' -H 'X-Requested-With: XMLHttpRequest' -H 'User-Agent: Mozilla/5.0 Chrome/120' https://leagues.teamlinkt.com/leagues/getAllEvents/10372)",
+      "Bash(curl -s -o /dev/null -w 'HTTP %{http_code}  %{size_download}b  ct=%{content_type}\\\\n' -H 'X-Requested-With: XMLHttpRequest' -H 'User-Agent: Mozilla/5.0 Chrome/120' https://leagues.teamlinkt.com/leagues/getLeadPlayerStatisticCardsJSON/54723)",
+      "Bash(node src/probe-box.js)",
+      "Bash(node -e ' *)",
+      "Bash(cd *)",
+      "Bash(node src/collect.js)",
+      "Bash(grep -oiE 'data-bs-toggle=\"[^\"]*\"[^>]*>[^<]{2,30}' event-dom.html)",
+      "Bash(node src/probe-stats.js)",
+      "Bash(node -e 'const p=require\\(\"./data/snapshots/2026-06-25/player_stats.json\"\\);console.log\\(\"players:\",p.length\\);console.log\\(JSON.stringify\\(p[0],null,1\\)\\);console.log\\(\"names:\",p.map\\(x=>x.Name||x.col1\\).slice\\(0,24\\).join\\(\", \"\\)\\)')",
+      "Bash(node -e 'const p=require\\(\"./data/snapshots/2026-06-25/player_stats.json\"\\);console.log\\(\"team_id present:\",p.filter\\(r=>r.team_id\\).length+\"/\"+p.length\\);console.log\\(\"sample:\",p[0].Name,p[0].Team,p[0].team_id\\)')",
+      "Bash(npm run *)",
+      "Bash(node src/probe-page.js)",
+      "Skill(claude-api)",
+      "Bash(npm install *)"
+    ]
+  }
+}
