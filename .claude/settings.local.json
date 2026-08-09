@@ -33,7 +33,8 @@
       "Bash([ -f \"$f\" ])",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" https://josh-levinson.github.io/shorelinebb_magazine/)",
       "Bash(curl -s https://josh-levinson.github.io/shorelinebb_magazine/)",
-      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('build_type:', d.get\\('build_type'\\)\\); print\\('source:', d.get\\('source'\\)\\); print\\('status:', d.get\\('status'\\)\\)\")"
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('build_type:', d.get\\('build_type'\\)\\); print\\('source:', d.get\\('source'\\)\\); print\\('status:', d.get\\('status'\\)\\)\")",
+      "Bash(python3 *)"
     ]
   }
 }

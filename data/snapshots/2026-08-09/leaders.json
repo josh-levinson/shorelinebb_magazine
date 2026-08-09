@@ -1,0 +1,92 @@
+[
+  {
+    "statistic_id": 11059461,
+    "players": [
+      {
+        "name": "Ryan Florentine",
+        "team": "Huskies",
+        "value": 124
+      },
+      {
+        "name": "Khalid Jabarkhail",
+        "team": "Bulldogs",
+        "value": 106
+      },
+      {
+        "name": "Jeremy McDonald",
+        "team": "Green Wave",
+        "value": 90
+      },
+      {
+        "name": "David Orr",
+        "team": "Red Storm",
+        "value": 81
+      },
+      {
+        "name": "Colby Morawski",
+        "team": "Black Mamba",
+        "value": 80
+      }
+    ]
+  },
+  {
+    "statistic_id": 11059465,
+    "players": [
+      {
+        "name": "Jon Fiorillo",
+        "team": "Huskies",
+        "value": 14
+      },
+      {
+        "name": "Paul Votto",
+        "team": "Black Mamba",
+        "value": 14
+      },
+      {
+        "name": "Jeremy McDonald",
+        "team": "Green Wave",
+        "value": 13
+      },
+      {
+        "name": "Dimitrios Varrias",
+        "team": "Bulldogs",
+        "value": 13
+      },
+      {
+        "name": "Branden LaPia",
+        "team": "Red Storm",
+        "value": 13
+      }
+    ]
+  },
+  {
+    "statistic_id": 11059450,
+    "players": [
+      {
+        "name": "Mason Carey",
+        "team": "Bulldogs",
+        "value": 6
+      },
+      {
+        "name": "Khalid Jabarkhail",
+        "team": "Bulldogs",
+        "value": 6
+      },
+      {
+        "name": "James Holt",
+        "team": "Red Storm",
+        "value": 5
+      },
+      {
+        "name": "Jeffrey Luman",
+        "team": "Green Wave",
+        "value": 5
+      },
+      {
+        "name": "Michael Oberempt",
+        "team": "Red Storm",
+        "value": 5
+      }
+    ]
+  }
+]
