@@ -92,10 +92,51 @@ function splitHead(markdown) {
 const stripMd = (s) =>
   s.replace(/\*\*?|__?|`/g, "").replace(/\[([^\]]+)\]\([^)]+\)/g, "$1").replace(/\s+/g, " ").trim();
 
+// ---- draft board -----------------------------------------------------------
+// The draft board is a hand-built, self-contained HTML fragment (its own
+// <title>/<style>/<script>, data embedded inline) saved as
+// summaries/<date>-draft-board.html whenever `npm run draft` output gets
+// turned into a page. Publish the newest one, if any, as dist/draft.html.
+function loadLatestDraftBoard() {
+  const files = existsSync(summariesDir) ? readdirSync(summariesDir) : [];
+  let latest = null;
+  for (const f of files) {
+    const m = f.match(/^(\d{4}-\d{2}-\d{2})-draft-board\.html$/);
+    if (m && (!latest || m[1] > latest.date)) latest = { date: m[1], file: f };
+  }
+  if (!latest) return null;
+  return { date: latest.date, fragment: readFileSync(join(summariesDir, latest.file), "utf8") };
+}
+
+function renderDraftPage(draft) {
+  // Give the fragment a way back to the magazine; its own masthead has no nav.
+  const backLink = `<p style="margin:14px 0 0;font-size:12px;letter-spacing:.08em;`
+    + `text-transform:uppercase"><a href="./index.html" `
+    + `style="color:var(--ink-3);text-decoration:none">&larr; The Shoreline Weekly</a></p>`;
+  const content = draft.fragment.replace(
+    /<div class="wrap">/,
+    `<div class="wrap">\n  ${backLink}`,
+  );
+  return `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+${content}
+</body>
+</html>
+`;
+}
+
 // ---- HTML rendering --------------------------------------------------------
 const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-function page({ relCss, relHome, bodyClass, content }) {
+function page({ relCss, relHome, relDraft, bodyClass, content }) {
+  const nav = relDraft
+    ? `\n  <nav class="masthead-nav"><a href="${relDraft}">Draft Board</a></nav>`
+    : "";
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -112,7 +153,7 @@ function page({ relCss, relHome, bodyClass, content }) {
   <a class="masthead-link" href="${relHome}">
     <div class="masthead-title">${esc(SITE_TITLE)}</div>
     <div class="masthead-tagline">${esc(SITE_TAGLINE)}</div>
-  </a>
+  </a>${nav}
 </header>
 <main>
 ${content}
@@ -126,7 +167,7 @@ ${content}
 `;
 }
 
-function renderIssue(issue) {
+function renderIssue(issue, hasDraft) {
   const feature = md.render(issue.featureBody || "");
   const record = issue.articleBody && issue.recordBody
     ? `<section class="record">
@@ -145,13 +186,19 @@ function renderIssue(issue) {
   <p class="back"><a href="../index.html">← All issues</a></p>
 </article>`;
 
-  return page({ relCss: "../style.css", relHome: "../index.html", bodyClass: "issue-page", content });
+  return page({
+    relCss: "../style.css", relHome: "../index.html",
+    relDraft: hasDraft ? "../draft.html" : null,
+    bodyClass: "issue-page", content,
+  });
 }
 
-function renderIndex(issues) {
+function renderIndex(issues, hasDraft) {
   if (issues.length === 0) {
     return page({
-      relCss: "./style.css", relHome: "./index.html", bodyClass: "cover",
+      relCss: "./style.css", relHome: "./index.html",
+      relDraft: hasDraft ? "./draft.html" : null,
+      bodyClass: "cover",
       content: `<p class="empty">No issues yet. Run <code>npm run weekly</code> to generate one.</p>`,
     });
   }
@@ -179,22 +226,27 @@ function renderIndex(issues) {
     : "";
 
   return page({
-    relCss: "./style.css", relHome: "./index.html", bodyClass: "cover",
+    relCss: "./style.css", relHome: "./index.html",
+    relDraft: hasDraft ? "./draft.html" : null,
+    bodyClass: "cover",
     content: `${lead}\n${archive}`,
   });
 }
 
 // ---- build -----------------------------------------------------------------
 const issues = loadIssues();
+const draft = loadLatestDraftBoard();
 
 mkdirSync(join(distDir, "issues"), { recursive: true });
-writeFileSync(join(distDir, "index.html"), renderIndex(issues));
+writeFileSync(join(distDir, "index.html"), renderIndex(issues, !!draft));
 for (const issue of issues) {
-  writeFileSync(join(distDir, issue.slug), renderIssue(issue));
+  writeFileSync(join(distDir, issue.slug), renderIssue(issue, !!draft));
 }
+if (draft) writeFileSync(join(distDir, "draft.html"), renderDraftPage(draft));
 copyFileSync(join(root, "src", "magazine.css"), join(distDir, "style.css"));
 // Tell Pages not to run the output through Jekyll.
 writeFileSync(join(distDir, ".nojekyll"), "");
 
 console.log(`Built ${issues.length} issue(s) → dist/`);
 for (const it of issues) console.log(`  ${it.date}  ${it.title}`);
+if (draft) console.log(`Draft board (${draft.date}) → dist/draft.html`);

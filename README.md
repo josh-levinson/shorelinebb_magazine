@@ -144,6 +144,12 @@ deterministic summary is reproduced below it as "The Record" (box scores,
 standings, stat leaders). `src/site.js` renders `summaries/*.md` into a static
 magazine in `dist/` — plain HTML + one stylesheet, no framework.
 
+The masthead also links to a **Draft Board** page. `src/site.js` picks up the
+newest `summaries/<date>-draft-board.html` (a hand-built, self-contained page —
+title/style/script with the draft data inlined) and publishes it as
+`dist/draft.html`. Save a new one under that filename after a draft run to
+update the published board; if none exists, the nav link is simply omitted.
+
 `dist/` is a build artifact (gitignored). It's published to **GitHub Pages** by
 `.github/workflows/pages.yml`, which runs on every push to `main`: it builds the
 site from the committed markdown and deploys it. So the weekly rhythm is:
