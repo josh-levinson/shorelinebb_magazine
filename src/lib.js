@@ -356,7 +356,11 @@ Hard rules:
 - If it's the first week, frame it as the season tip-off and avoid week-over-week "movement" language.
 - A game with \`forfeit: true\` had no players show up on the losing side — the 2-0 score is just the
   league's forfeit convention, not a real final. Say plainly that it was a forfeit; do NOT invent a
-  shot, a bucket, or any play-by-play for it.`;
+  shot, a bucket, or any play-by-play for it.
+- Avoid stock sportswriter clichés for big performances (e.g. "goes nuclear", "explodes for",
+  "erupts for", "torches", "lights it up") — these recur week over week and read as formulaic
+  across a season's worth of headlines. Reach for a fresh, specific way to describe the
+  performance instead, especially in the headline.`;
 
   const userPrompt = `Write this week's recap article for the league. Structure it as:
 
