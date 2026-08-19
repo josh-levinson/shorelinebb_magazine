@@ -96,6 +96,11 @@ thead th{
   border-bottom:1px solid var(--rule);white-space:nowrap;
 }
 thead th.l{text-align:left}
+thead th[data-key]{cursor:pointer}
+thead th[data-key]:hover{color:var(--ink)}
+thead th.sorted{color:var(--accent)}
+thead th abbr{text-decoration:none;border-bottom:1px dotted var(--ink-3);cursor:help}
+.sortarrow{display:inline-block;margin-left:3px;font-size:8px;position:relative;top:-1px}
 tbody td{padding:8px 8px;text-align:right;border-bottom:1px solid var(--rule-2);white-space:nowrap}
 /* Value is the point of the board — pin it to the right edge so it stays
    readable when the table scrolls internally at narrow widths. */
@@ -245,9 +250,21 @@ footer{border-top:1px solid var(--rule);margin-top:14px;padding:22px 0 60px;colo
           <table>
             <thead>
               <tr>
-                <th class="l">#</th><th class="l">Player</th><th class="l">Tm</th>
-                <th>GP</th><th>PPG</th><th>RPG</th><th>APG</th>
-                <th>SPG</th><th>BPG</th><th>Defl</th><th>PPP</th><th>TS%</th><th>TO%</th><th>Avail</th><th class="valcol">Value</th>
+                <th class="l" data-key="r" title="Overall rank by composite value">#</th>
+                <th class="l" data-key="n">Player</th>
+                <th class="l" data-key="t">Tm</th>
+                <th data-key="g"><abbr title="Games played">GP</abbr></th>
+                <th data-key="p"><abbr title="Points per game">PPG</abbr></th>
+                <th data-key="rb"><abbr title="Rebounds per game">RPG</abbr></th>
+                <th data-key="as"><abbr title="Assists per game">APG</abbr></th>
+                <th data-key="s"><abbr title="Steals per game">SPG</abbr></th>
+                <th data-key="b"><abbr title="Blocks per game">BPG</abbr></th>
+                <th data-key="dfl"><abbr title="Deflections per game — passes or dribbles disrupted; a hustle stat separate from steals and blocks">Defl</abbr></th>
+                <th data-key="ppp"><abbr title="Net points per possession while the player is on court (Off. PPP − Def. PPP)">PPP</abbr></th>
+                <th data-key="ts"><abbr title="True Shooting % — scoring efficiency accounting for 2s, 3s, and free throws">TS%</abbr></th>
+                <th data-key="top"><abbr title="Turnovers per 100 plays — lower is better">TO%</abbr></th>
+                <th data-key="at"><abbr title="Availability multiplier — attendance against the games with recorded stats, scaled into value">Avail</abbr></th>
+                <th class="valcol" data-key="v"><abbr title="Composite value score — the number the board is ranked on">Value</abbr></th>
               </tr>
             </thead>
             <tbody id="board"></tbody>
@@ -322,40 +339,96 @@ const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&g
 const f1 = n => n.toFixed(1);
 const sgn = n => (n>=0?"+":"") + n.toFixed(2);
 
-/* ---- big board with tier bands ---- */
+/* ---- big board with tier bands + sorting ---- */
 const tb = document.getElementById("board");
-let lastTier = -1;
 const tierCount = {};
 DATA.players.forEach(p => { tierCount[p.ti] = (tierCount[p.ti]||0)+1; });
 
-DATA.players.forEach(p => {
-  if (p.ti !== lastTier) {
-    lastTier = p.ti;
+// Default sort direction per column: name/team alphabetical, rank ascending,
+// TO% ascending (lower is better), everything else descending (higher is better).
+const DEFAULT_DIR = { r: "asc", n: "asc", t: "asc", top: "asc" };
+const sortState = { key: "r", dir: "asc" };
+
+function sortedPlayers() {
+  const { key, dir } = sortState;
+  const arr = DATA.players.slice();
+  arr.sort((a, b) => {
+    let av = a[key], bv = b[key];
+    if (typeof av === "string") { av = av.toLowerCase(); bv = bv.toLowerCase(); }
+    if (av < bv) return dir === "asc" ? -1 : 1;
+    if (av > bv) return dir === "asc" ? 1 : -1;
+    return a.r - b.r; // stable tiebreak
+  });
+  return arr;
+}
+
+function renderBoard() {
+  tb.innerHTML = "";
+  // Tier bands only make sense in the board's natural (rank-ascending) order —
+  // any other sort interleaves tiers, so drop the bands rather than mislabel rows.
+  const useBands = sortState.key === "r" && sortState.dir === "asc";
+  let lastTier = -1;
+  sortedPlayers().forEach(p => {
+    if (useBands && p.ti !== lastTier) {
+      lastTier = p.ti;
+      const tr = document.createElement("tr");
+      tr.className = "band";
+      tr.innerHTML = '<td colspan="15"><div class="bandin">'
+        + '<span class="bandkey" style="background:'+TIER_COLORS[p.ti]+'"></span>'
+        + '<span class="bandname">'+esc(DATA.tier_names[p.ti])+'</span>'
+        + '<span class="bandmeta">'+tierCount[p.ti]+' player'+(tierCount[p.ti]===1?'':'s')+'</span>'
+        + '</div></td>';
+      tb.appendChild(tr);
+    }
+    const pct = Math.round(p.at*100);
+    const cls = pct >= 83 ? "a-full" : pct >= 50 ? "a-part" : "a-thin";
     const tr = document.createElement("tr");
-    tr.className = "band";
-    tr.innerHTML = '<td colspan="15"><div class="bandin">'
-      + '<span class="bandkey" style="background:'+TIER_COLORS[p.ti]+'"></span>'
-      + '<span class="bandname">'+esc(DATA.tier_names[p.ti])+'</span>'
-      + '<span class="bandmeta">'+tierCount[p.ti]+' player'+(tierCount[p.ti]===1?'':'s')+'</span>'
-      + '</div></td>';
+    tr.innerHTML =
+        '<td class="l rk num">'+p.r+'</td>'
+      + '<td class="l"><span class="pname">'+esc(p.n)+'</span><span class="parch">'+esc(p.a)+'</span></td>'
+      + '<td class="l"><span class="tm">'+esc(p.t)+'</span></td>'
+      + '<td class="num gp">'+p.g+'</td>'
+      + '<td class="num">'+f1(p.p)+'</td><td class="num">'+f1(p.rb)+'</td><td class="num">'+f1(p.as)+'</td>'
+      + '<td class="num">'+f1(p.s)+'</td><td class="num">'+f1(p.b)+'</td><td class="num">'+f1(p.dfl)+'</td>'
+      + '<td class="num">'+sgn(p.ppp)+'</td><td class="num">'+f1(p.ts)+'</td><td class="num">'+f1(p.top)+'</td>'
+      + '<td><span class="att '+cls+'"><span class="attbar"><i style="width:'+pct+'%"></i></span>'
+        + '<span class="attn num">'+pct+'%</span></span></td>'
+      + '<td class="num val'+(p.v>0?' pos':'')+'">'+sgn(p.v)+'</td>';
     tb.appendChild(tr);
-  }
-  const pct = Math.round(p.at*100);
-  const cls = pct >= 83 ? "a-full" : pct >= 50 ? "a-part" : "a-thin";
-  const tr = document.createElement("tr");
-  tr.innerHTML =
-      '<td class="l rk num">'+p.r+'</td>'
-    + '<td class="l"><span class="pname">'+esc(p.n)+'</span><span class="parch">'+esc(p.a)+'</span></td>'
-    + '<td class="l"><span class="tm">'+esc(p.t)+'</span></td>'
-    + '<td class="num gp">'+p.g+'</td>'
-    + '<td class="num">'+f1(p.p)+'</td><td class="num">'+f1(p.rb)+'</td><td class="num">'+f1(p.as)+'</td>'
-    + '<td class="num">'+f1(p.s)+'</td><td class="num">'+f1(p.b)+'</td><td class="num">'+f1(p.dfl)+'</td>'
-    + '<td class="num">'+sgn(p.ppp)+'</td><td class="num">'+f1(p.ts)+'</td><td class="num">'+f1(p.top)+'</td>'
-    + '<td><span class="att '+cls+'"><span class="attbar"><i style="width:'+pct+'%"></i></span>'
-      + '<span class="attn num">'+pct+'%</span></span></td>'
-    + '<td class="num val'+(p.v>0?' pos':'')+'">'+sgn(p.v)+'</td>';
-  tb.appendChild(tr);
+  });
+}
+
+function updateSortIndicators() {
+  document.querySelectorAll("thead th[data-key]").forEach(th => {
+    th.classList.remove("sorted");
+    const old = th.querySelector(".sortarrow");
+    if (old) old.remove();
+    if (th.dataset.key === sortState.key) {
+      th.classList.add("sorted");
+      const arrow = document.createElement("span");
+      arrow.className = "sortarrow";
+      arrow.textContent = sortState.dir === "asc" ? "▲" : "▼";
+      th.appendChild(arrow);
+    }
+  });
+}
+
+document.querySelectorAll("thead th[data-key]").forEach(th => {
+  th.addEventListener("click", () => {
+    const key = th.dataset.key;
+    if (sortState.key === key) {
+      sortState.dir = sortState.dir === "asc" ? "desc" : "asc";
+    } else {
+      sortState.key = key;
+      sortState.dir = DEFAULT_DIR[key] || "desc";
+    }
+    updateSortIndicators();
+    renderBoard();
+  });
 });
+
+updateSortIndicators();
+renderBoard();
 
 /* ---- value curve ---- */
 (function(){
