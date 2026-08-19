@@ -223,7 +223,10 @@ for (const g of finals) {
     writeFileSync(`${BOX}/${g.event_id}.json`, captured);
     try {
       const j = JSON.parse(captured);
-      const n = j?.payload?.stats?.length ?? 0;
+      // payload.stats is keyed by team_id (an object), not an array — .length
+      // is always undefined on it, so count players with a statistic block instead.
+      const n = Object.values(j?.payload?.stats ?? {})
+        .reduce((sum, team) => sum + Object.keys(team.statistic ?? {}).length, 0);
       if (n > 0) boxCount++;
       log(`  box ${g.event_id}: ${n} stat lines${n === 0 ? " (not analyzed yet)" : ""}`);
     } catch {}
