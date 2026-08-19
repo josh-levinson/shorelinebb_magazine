@@ -36,21 +36,52 @@ analyzed games, so the **full cumulative table is the source of truth** — the
 weekly diff gives us per-week lines without needing per-event box scores.
 **Run the collector on Sunday/Monday**, after the weekend analysis lands.
 
+## Hoopsalytics — advanced stats (draft board source)
+
+TeamLinkt's basic box score is actually republished from **Hoopsalytics**, the
+league's stats provider, which exposes far more per-player detail directly at
+`hoopsalytics.com` — the site the draft board (`src/draft.js`) is valued from.
+
+Hoopsalytics sits behind a login, but it's **email-only** (type your email,
+you're in — no password). `src/collect-hoopsalytics.js` drives this with
+Playwright, the same way `src/collect.js` drives TeamLinkt: log in, then load
+`stats/show-league.php?season_id=19&view=<View>` for each of seven views
+(Offense, Defense, Key Stats, Scouting, Shooting, Deluxe Stats, Shooting from
+Sets) and scrape the rendered `#league-table` — this site is plain
+server-rendered HTML per view, no pagination and no separate JSON endpoint to
+sniff. The views are merged into one row per player (49 roster slots, one
+unnamed/unused) and written to
+`data/snapshots/<date>/hoopsalytics_stats.json`.
+
+One quirk worth knowing if you touch the parser: the site renders player names
+with `U+00A0` (non-breaking space) between first/last name, which breaks
+name-keyed lookups unless normalized — `parsePlayerCell()` handles this.
+
+Discovery notes and raw per-view captures (headers, sample rows, login-flow
+HTML) live in `data/probe/hoopsalytics/` (gitignored) from
+`src/probe-hoopsalytics.js` and `src/probe-hoopsalytics-views.js` — useful
+reference if a view's columns change.
+
+Set `HOOPSALYTICS_EMAIL` in `.env` (see `.env.example`) before running it.
+
 ## Layout
 
 ```
-src/collect.js        # Playwright collector → writes a weekly snapshot
-src/site.js           # static-site builder → renders summaries/ into dist/ (the magazine)
-src/magazine.css      # magazine stylesheet (copied to dist/style.css on build)
-src/probe*.js         # one-off discovery scripts (kept for debugging)
+src/collect.js             # Playwright collector (TeamLinkt) → writes a weekly snapshot
+src/collect-hoopsalytics.js # Playwright collector (Hoopsalytics) → advanced stats, draft board source
+src/draft.js                # draft board generator (valuation model + snake draft sim)
+src/site.js                 # static-site builder → renders summaries/ into dist/ (the magazine)
+src/magazine.css            # magazine stylesheet (copied to dist/style.css on build)
+src/probe*.js                # one-off discovery scripts (kept for debugging)
 data/snapshots/<date>/
-  standings.json      # parsed standings
-  games.json          # parsed games + scores + event ids
-  player_stats.json   # full per-player cumulative stat lines  ← diff source
-  leaders.json        # top-5 leader cards
-  boxscores/<id>.json # per-event box score (empty until published)
-  raw/                # untouched JSON, for re-parsing if a layout changes
-  manifest.json       # counts + season url
+  standings.json           # parsed standings
+  games.json               # parsed games + scores + event ids
+  player_stats.json        # full per-player cumulative stat lines (TeamLinkt) ← diff source
+  hoopsalytics_stats.json  # full per-player advanced stat lines (Hoopsalytics) ← draft board source
+  leaders.json             # top-5 leader cards
+  boxscores/<id>.json      # per-event box score (empty until published)
+  raw/                     # untouched JSON, for re-parsing if a layout changes
+  manifest.json            # counts + season url
 ```
 
 ## Usage
@@ -58,7 +89,7 @@ data/snapshots/<date>/
 ```bash
 npm install                        # first time
 npx playwright install chromium    # first time
-cp .env.example .env               # then paste your key into .env (for the AI article step)
+cp .env.example .env               # then fill in .env (API key for the article step, login email for Hoopsalytics)
 
 npm run weekly                     # collect snapshot → deterministic summary → AI article
 # or step by step:
@@ -67,6 +98,9 @@ npm run summary                    # writes summaries/<today>.md (deterministic;
 npm run article                    # writes summaries/<today>-article.md (AI-written; needs API key)
 npm run site                       # builds the magazine into dist/ (no API key needed)
 node src/article.js 2026-06-29     # render a specific snapshot as "latest"
+
+npm run collect:hoopsalytics       # writes data/snapshots/<today>/hoopsalytics_stats.json (needs HOOPSALYTICS_EMAIL)
+npm run draft                      # writes summaries/<today>-draft.{md,json} from the latest snapshot
 ```
 
 `npm run weekly` now ends by building the site, so a normal run produces the
@@ -93,9 +127,11 @@ per-week lines kick in on the second run.
 ## Status
 
 - [x] **Collector** (`src/collect.js`) — standings, games/scores, full player stats, leaders. Validated live.
+- [x] **Hoopsalytics collector** (`src/collect-hoopsalytics.js`) — advanced per-player stats across 7 views. Validated live.
 - [x] **Analyzer** (`src/lib.js`) — snapshot diff → weekly production; standings movement; double-doubles.
 - [x] **Summarizer** (`src/summarize.js`) — renders the deterministic `summaries/<date>.md`.
 - [x] **Article writer** (`src/article.js`) — Claude-written ESPN-style `summaries/<date>-article.md`.
+- [x] **Draft board** (`src/draft.js`) — valuation model + snake draft sim, sourced from Hoopsalytics. Manual step, not part of `npm run weekly`.
 
 ### Possible next steps
 - Auto-email the article each week (your Gmail is connected to Claude Code).

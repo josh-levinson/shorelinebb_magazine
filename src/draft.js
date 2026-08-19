@@ -42,7 +42,7 @@
 //
 // Usage:  node src/draft.js [snapshot-stamp] [--teams N] [--rounds N]
 import { writeFileSync, mkdirSync } from "node:fs";
-import { listSnapshots, loadSnapshot, teamNameById } from "./lib.js";
+import { listSnapshots, loadSnapshot } from "./lib.js";
 
 // ---- tunables --------------------------------------------------------------
 const SHRINK_K = 2; // pseudo-games pulled toward replacement level
@@ -84,41 +84,41 @@ if (stamps.length === 0) {
 }
 const stamp = stampArg || stamps[stamps.length - 1];
 const snap = loadSnapshot(stamp);
-if (!snap.players.length) {
-  console.error(`Snapshot ${stamp} has no player stats.`);
+if (!snap.hoopsalytics.length) {
+  console.error(`Snapshot ${stamp} has no Hoopsalytics stats. Run \`node src/collect-hoopsalytics.js ${stamp}\` first.`);
   process.exit(1);
 }
-const NUM_ROUNDS = flag("rounds", Math.floor(snap.players.length / NUM_TEAMS));
+const NUM_ROUNDS = flag("rounds", Math.floor(snap.hoopsalytics.length / NUM_TEAMS));
 
 // Attendance denominator: the stats table lags the schedule (teams have played
 // more games than the table carries lines for), so measure attendance against
 // the most games any player is credited with rather than against the schedule.
 // Deriving it keeps the board honest as the season runs on.
-const GAMES_WITH_STATS = Math.max(...snap.players.map((p) => num(p.GP)), 1);
+const GAMES_WITH_STATS = Math.max(...snap.hoopsalytics.map((p) => num(p.Games)), 1);
 
 // ---- 1. per-game rates -----------------------------------------------------
-const teamNames = teamNameById(snap);
-const raw = snap.players.map((p) => {
-  const gp = Math.max(num(p.GP), 1);
-  const fga = num(p["2PA"]) + num(p["3PA"]);
-  const tsa = fga + 0.44 * num(p.FTA);
+// Sourced from Hoopsalytics (src/collect-hoopsalytics.js), the league's stats
+// provider — richer than the basic box score TeamLinkt republishes, and it
+// carries True Shooting % directly rather than needing it derived here.
+const raw = snap.hoopsalytics.map((p) => {
+  const gp = Math.max(num(p.Games), 1);
+  const madeOf = (s) => num(String(s ?? "").split("/")[0]);
   return {
-    name: p.Name,
-    team_code: p.Team,
-    team: teamNames.get(p.team_id) || p.Team,
-    gp: num(p.GP),
-    pts: num(p.TP) / gp,
-    reb: num(p.TOTRB) / gp,
-    ast: num(p.AST) / gp,
-    stl: num(p.STL) / gp,
-    blk: num(p.BLK) / gp,
+    name: p.name,
+    team_code: p.team,
+    team: p.team,
+    gp: num(p.Games),
+    pts: num(p["Pts."]) / gp,
+    reb: num(p.Reb) / gp,
+    ast: num(p.Ast) / gp,
+    stl: num(p.Stl) / gp,
+    blk: num(p.Blk) / gp,
     to: num(p.TO) / gp,
-    // True shooting: points per scoring attempt. Guard the zero-attempt case.
-    ts: tsa > 0 ? (100 * num(p.TP)) / (2 * tsa) : 0,
+    ts: num(p["TS%"]),
     totals: {
-      pts: num(p.TP), reb: num(p.TOTRB), ast: num(p.AST),
-      stl: num(p.STL), blk: num(p.BLK), to: num(p.TO),
-      threes: num(p["3PM"]),
+      pts: num(p["Pts."]), reb: num(p.Reb), ast: num(p.Ast),
+      stl: num(p.Stl), blk: num(p.Blk), to: num(p.TO),
+      threes: madeOf(p["3Pt/A"]),
     },
   };
 });
@@ -348,7 +348,7 @@ for (let slot = 0; slot < NUM_TEAMS; slot++) {
 w(`---`);
 w();
 w(`_Generated from the ${stamp} snapshot. Stats are cumulative season totals `
-  + `from the league site; per-event box scores are not published, so all rates `
+  + `from Hoopsalytics; per-event box scores are not published, so all rates `
   + `are derived from season totals divided by games played._`);
 
 mkdirSync("summaries", { recursive: true });

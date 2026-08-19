@@ -45,6 +45,10 @@ export function loadSnapshot(stamp) {
     players: readJSON(`${dir}/player_stats.json`, []),
     leaders: readJSON(`${dir}/leaders.json`, []),
     manifest: readJSON(`${dir}/manifest.json`, {}),
+    // Advanced per-player stats from Hoopsalytics (src/collect-hoopsalytics.js) —
+    // the draft board's category source. See data/probe/hoopsalytics/ for the
+    // field-discovery notes.
+    hoopsalytics: readJSON(`${dir}/hoopsalytics_stats.json`, []),
   };
 }
 

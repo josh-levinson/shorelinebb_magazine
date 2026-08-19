@@ -6,9 +6,11 @@
   "description": "Weekly summary generator for the Shoreline men's basketball league (TeamLinkt)",
   "scripts": {
     "collect": "node src/collect.js",
+    "collect:hoopsalytics": "node src/collect-hoopsalytics.js",
     "summary": "node src/summarize.js",
     "article": "node src/article.js",
     "site": "node src/site.js",
+    "draft": "node src/draft.js",
     "weekly": "node src/collect.js && node src/summarize.js && node src/article.js && node src/site.js"
   },
   "devDependencies": {
