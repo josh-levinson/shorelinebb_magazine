@@ -4,6 +4,11 @@
 // The valuation model, in order of operation:
 //   1. Per-game rates      — GP varies 1..6, so totals would just rank the
 //                            players who showed up most. Rates level that.
+//                            (Net PPP and TO% come out of Hoopsalytics as
+//                            rates already; foul rate is computed here as
+//                            Fouls / Def. Poss. for the same reason a raw
+//                            per-game foul count would — see below. All
+//                            three skip this step.)
 //   2. Reliability shrink  — a 30 PPG average over 3 games is less certain than
 //                            over 6, so rates regress toward a *replacement
 //                            level* baseline with weight K. This is about
@@ -51,16 +56,44 @@ const ATT_BASE = 0.76; // availability multiplier at zero attendance
 const ATT_SLOPE = 0.36; // ...plus this much at full attendance → 1.12 at 6/6
 
 // Category weights for the composite. Scoring leads, then rebounding and
-// playmaking, then defense; turnovers are a penalty. Efficiency (TS%) is a
-// modest bonus so volume chuckers don't dominate on points alone.
+// playmaking, then defense; turnovers are a penalty. Two categories draw on
+// Hoopsalytics' advanced views rather than the basic box score:
+//   - netppp  — team point differential per possession while the player is
+//               on court (Off. PPP − Def. PPP). The single best two-way
+//               impact number Hoopsalytics exposes, so it earns real weight
+//               alongside — not instead of — the counting stats.
+//   - deflect — deflections per game. A hustle/defense signal steals and
+//               blocks miss entirely (most deflections never become a
+//               takeaway), weighted lightly since it's a noisier stat.
+// Turnovers moved from a raw per-game count to TO% (turnovers per 100
+// plays), since raw count just measures usage — a low-usage player looks
+// "safe" purely by touching the ball less. TO% is usage-normalized, so it
+// actually separates careless ball-handling from low involvement.
+//   - foul_rate — personal fouls per 100 defensive possessions (Fouls /
+//                 Def. Poss.), the same usage-normalization applied to TO%
+//                 and for the same reason: a bench player fouls less
+//                 purely by playing fewer possessions, not by being more
+//                 disciplined. Weighted lighter than TO% (-0.25 vs -0.4)
+//                 because fouls that result in made free throws are
+//                 already partly reflected in Def. PPP — this term is
+//                 mainly picking up non-shooting fouls, bonus-trigger
+//                 fouls, and foul-out risk that PPP doesn't see.
+// Other Hoopsalytics fields (Usage%, Reb%, A/TO, Charges, Tie-Ups, Def.
+// Fail/Praise, FTO) were left out: Usage%/Reb%/A/TO are largely redundant
+// with categories already here once shrink+z-score normalize them, and
+// Charges/Tie-Ups/Def. Fail/Def. Praise/FTO are near-all-zero in this pool
+// (see the collector's field notes) — no signal to weight.
 const WEIGHTS = {
   pts: 1.0,
   reb: 0.7,
   ast: 0.7,
   stl: 0.5,
   blk: 0.4,
+  deflect: 0.3,
+  netppp: 0.6,
   ts: 0.4,
-  to: -0.4,
+  to_pct: -0.4,
+  foul_rate: -0.25,
 };
 
 const num = (v) => {
@@ -113,12 +146,16 @@ const raw = snap.hoopsalytics.map((p) => {
     ast: num(p.Ast) / gp,
     stl: num(p.Stl) / gp,
     blk: num(p.Blk) / gp,
-    to: num(p.TO) / gp,
+    deflect: num(p.Deflect) / gp,
+    to: num(p.TO) / gp, // informational only — TO% (below) drives scoring
+    to_pct: num(p["TO%"]),
+    netppp: num(p["Net PPP"]),
     ts: num(p["TS%"]),
+    foul_rate: num(p["Def. Poss."]) > 0 ? (num(p.Fouls) / num(p["Def. Poss."])) * 100 : 0,
     totals: {
       pts: num(p["Pts."]), reb: num(p.Reb), ast: num(p.Ast),
-      stl: num(p.Stl), blk: num(p.Blk), to: num(p.TO),
-      threes: madeOf(p["3Pt/A"]),
+      stl: num(p.Stl), blk: num(p.Blk), to: num(p.TO), deflect: num(p.Deflect),
+      threes: madeOf(p["3Pt/A"]), fouls: num(p.Fouls),
     },
   };
 });
@@ -183,14 +220,18 @@ raw.forEach((p, i) => (p.rank = i + 1));
 
 // ---- tiers -----------------------------------------------------------------
 // Cut on natural gaps in the value curve rather than fixed bucket sizes.
+// These thresholds are recalibrated for the wider composite range that comes
+// from folding in deflections and Net PPP (roughly -8..+10 now, vs. the old
+// seven-category model's -4..+8) — re-tune them if the category set or
+// weights change again and the curve's gaps drift from these breaks.
 const TIER_NAMES = ["Franchise", "Core Starter", "Starter", "Rotation", "Bench", "Depth"];
 const tierOf = (p) => {
   const v = p.value;
-  if (v >= 3.0) return 0;
-  if (v >= 1.5) return 1;
-  if (v >= 0.4) return 2;
-  if (v >= -0.6) return 3;
-  if (v >= -1.6) return 4;
+  if (v >= 8.0) return 0;
+  if (v >= 4.0) return 1;
+  if (v >= 1.8) return 2;
+  if (v >= -1.0) return 3;
+  if (v >= -4.6) return 4;
   return 5;
 };
 for (const p of raw) p.tier = tierOf(p);
@@ -203,8 +244,9 @@ function archetype(p) {
   if (p.z.pts > 1.0) tags.push("Scorer");
   if (p.z.reb > 1.0) tags.push("Rebounder");
   if (p.z.ast > 1.0) tags.push("Playmaker");
-  if (p.z.stl > 1.0 || p.z.blk > 1.0) tags.push("Defender");
+  if (p.z.stl > 1.0 || p.z.blk > 1.0 || p.z.deflect > 1.2) tags.push("Defender");
   if (p.z.ts > 0.8 && p.z.pts > -0.3) tags.push("Efficient");
+  if (p.z.netppp > 1.2) tags.push("Winner");
   if (!tags.length) {
     if (p.z.pts > 0.2) tags.push("Complementary Scorer");
     else if (p.z.reb > 0.2) tags.push("Glass Work");
@@ -249,9 +291,13 @@ w(`_${NUM_TEAMS}-team redraft · ${raw.length} players · stats through ${fmtDat
 w();
 w(`## How players are valued`);
 w();
-w(`Every player is scored on per-game production across seven categories, `
-  + `standardized against the league pool so rebounds and assists carry `
-  + `comparable weight. Two adjustments sit on top:`);
+w(`Every player is scored on per-game production across ten categories — `
+  + `points, rebounds, assists, steals, blocks, deflections, Net PPP `
+  + `(on-court point differential per possession), True Shooting %, `
+  + `turnover rate, and foul rate — standardized against the league pool `
+  + `so rebounds and assists carry comparable weight. Deflections, Net PPP, `
+  + `and foul rate come from Hoopsalytics' advanced views rather than the `
+  + `basic box score. Two adjustments sit on top:`);
 w();
 w(`- **Reliability.** Rate stats regress toward a replacement-level baseline `
   + `(the ${Math.round(REPLACEMENT_PCTILE * 100)}th percentile of the pool) based `
@@ -272,12 +318,13 @@ w();
 // ---- big board -------------------------------------------------------------
 w(`## The Big Board`);
 w();
-w(`| # | Player | Team | Tier | GP | PPG | RPG | APG | SPG | BPG | TS% | Avail | Value |`);
-w(`|--:|--------|------|------|---:|----:|----:|----:|----:|----:|----:|------:|------:|`);
+w(`| # | Player | Team | Tier | GP | PPG | RPG | APG | SPG | BPG | DEFL | PPP | TS% | TO% | FOUL% | Avail | Value |`);
+w(`|--:|--------|------|------|---:|----:|----:|----:|----:|----:|-----:|----:|----:|----:|------:|------:|------:|`);
 for (const p of raw) {
   w(`| ${p.rank} | **${p.name}** | ${p.team_code} | ${TIER_NAMES[p.tier]} `
     + `| ${p.gp} | ${p.pts.toFixed(1)} | ${p.reb.toFixed(1)} | ${p.ast.toFixed(1)} `
-    + `| ${p.stl.toFixed(1)} | ${p.blk.toFixed(1)} | ${p.ts.toFixed(1)} `
+    + `| ${p.stl.toFixed(1)} | ${p.blk.toFixed(1)} | ${p.deflect.toFixed(1)} `
+    + `| ${sign(p.netppp)} | ${p.ts.toFixed(1)} | ${p.to_pct.toFixed(1)} | ${p.foul_rate.toFixed(1)} `
     + `| ${Math.round(p.attendance * 100)}% | ${sign(p.value)} |`);
 }
 w();
@@ -311,6 +358,8 @@ leaderRow("Rebounds", "reb");
 leaderRow("Assists", "ast");
 leaderRow("Steals", "stl");
 leaderRow("Blocks", "blk");
+leaderRow("Deflections", "deflect");
+leaderRow("Net PPP", "netppp", 2);
 leaderRow("True Shooting", "ts");
 w();
 
@@ -383,6 +432,8 @@ writeFileSync(
         gp: p.gp, tier: p.tier, archetype: p.archetype,
         pts: +p.pts.toFixed(2), reb: +p.reb.toFixed(2), ast: +p.ast.toFixed(2),
         stl: +p.stl.toFixed(2), blk: +p.blk.toFixed(2), to: +p.to.toFixed(2),
+        deflect: +p.deflect.toFixed(2), netppp: +p.netppp.toFixed(3),
+        to_pct: +p.to_pct.toFixed(1), foul_rate: +p.foul_rate.toFixed(2),
         ts: +p.ts.toFixed(1), attendance: +p.attendance.toFixed(3),
         base: +p.base.toFixed(3), value: +p.value.toFixed(3),
         totals: p.totals,
