@@ -17,6 +17,11 @@ export const STAT_LABELS = {
   "3PM": "3PM", TO: "TO", OR: "OReb", DR: "DReb", PF: "PF",
 };
 
+// The league scores a forfeit as a 2-0 win for whoever showed up — there's no
+// real box score for these, so treat them distinctly from "stats not posted yet".
+export const isForfeitScore = (g) =>
+  (g.home.score === 2 && g.away.score === 0) || (g.home.score === 0 && g.away.score === 2);
+
 const num = (v) => {
   const n = Number(String(v ?? "").replace(/[%,]/g, ""));
   return Number.isFinite(n) ? n : 0;
@@ -144,6 +149,11 @@ export function renderSummaryMarkdown({
       w(`### ${winner.name} ${winner.score}, ${loser.name} ${loser.score}`);
       w(`*${g.date}*`);
       w();
+      if (isForfeitScore(g)) {
+        w(`- _${loser.name} forfeited; ${winner.name} awarded the win._`);
+        w();
+        continue;
+      }
       // leading scorers, attributed by team (one game per team per week)
       for (const side of [h, a]) {
         const roster = byTeam(side.team_id)
@@ -230,7 +240,12 @@ export function renderSummaryMarkdown({
   }
 
   // ---- footer ------------------------------------------------------------
+  const forfeitTeamIds = new Set();
+  for (const g of games) {
+    if (isForfeitScore(g)) { forfeitTeamIds.add(g.home.team_id); forfeitTeamIds.add(g.away.team_id); }
+  }
   const missing = standings
+    .filter((t) => !forfeitTeamIds.has(t.team_id))
     .map((t) => t.team)
     .filter((name) => !production.some((p) => teamOf(p.team_id) === name && p.played_this_week));
   if (missing.length) {
@@ -282,12 +297,14 @@ export function buildArticleData({ league, venue, target, baseline, games, stand
         .slice(0, 4)
         .map((p) => ({ name: p.name, statline: line(p) }));
     const homeWon = g.home.score > g.away.score;
+    const forfeit = isForfeitScore(g);
     return {
       date: g.date,
-      home: { team: g.home.name, score: g.home.score, top: performers(g.home) },
-      away: { team: g.away.name, score: g.away.score, top: performers(g.away) },
+      home: { team: g.home.name, score: g.home.score, top: forfeit ? [] : performers(g.home) },
+      away: { team: g.away.name, score: g.away.score, top: forfeit ? [] : performers(g.away) },
       winner: (homeWon ? g.home : g.away).name,
       margin: Math.abs(g.home.score - g.away.score),
+      forfeit,
     };
   });
 
@@ -336,7 +353,10 @@ Hard rules:
   injuries, backstories, hometowns, nicknames, or any stat not present in the data.
 - Every number you cite must come from the data. Never round or embellish a score or stat line.
 - It's a rec league: keep the tone fun and affectionate, never mocking. Celebrate the players.
-- If it's the first week, frame it as the season tip-off and avoid week-over-week "movement" language.`;
+- If it's the first week, frame it as the season tip-off and avoid week-over-week "movement" language.
+- A game with \`forfeit: true\` had no players show up on the losing side — the 2-0 score is just the
+  league's forfeit convention, not a real final. Say plainly that it was a forfeit; do NOT invent a
+  shot, a bucket, or any play-by-play for it.`;
 
   const userPrompt = `Write this week's recap article for the league. Structure it as:
 
