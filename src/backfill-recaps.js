@@ -37,6 +37,7 @@ if (snaps.length === 0) {
 const latest = snaps[snaps.length - 1];
 const SNAP = `${SNAP_ROOT}/${latest}`;
 const BOX = `${SNAP}/boxscores`;
+const HBOX = `${SNAP}/hoopsalytics_boxscores`;
 
 const games = JSON.parse(readFileSync(`${SNAP}/games.json`, "utf8"))
   .filter((g) => g.final)
@@ -70,7 +71,27 @@ function loadStatTypes(payload) {
 
 // Parses one event's box score file into per-player weekly lines (same shape
 // weeklyProduction() produces, minus GP/MIN which per-game box scores don't carry).
+// Prefers TeamLinkt's own box score (getPlayerStatsForEvent, captured by
+// collect.js) — that's what already-generated recaps/articles for earlier
+// weeks were written from, so keep using it where it exists rather than
+// silently drifting their numbers. Falls back to hoopsalytics.com directly
+// (collect-hoopsalytics-boxscores.js) only for games TeamLinkt hasn't
+// republished yet but hoopsalytics has already fully scored.
 function parseBoxscore(event_id) {
+  const rows = parseTeamlinktBoxscore(event_id);
+  if (rows) return rows;
+
+  const hoopPath = `${HBOX}/${event_id}.json`;
+  if (existsSync(hoopPath)) {
+    try {
+      const hoopRows = JSON.parse(readFileSync(hoopPath, "utf8"));
+      if (hoopRows.length > 0) return hoopRows;
+    } catch { /* no usable data from either source */ }
+  }
+  return null;
+}
+
+function parseTeamlinktBoxscore(event_id) {
   const path = `${BOX}/${event_id}.json`;
   if (!existsSync(path)) return null;
   let json;

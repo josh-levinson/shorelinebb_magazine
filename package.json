@@ -7,6 +7,7 @@
   "scripts": {
     "collect": "node src/collect.js",
     "collect:hoopsalytics": "node src/collect-hoopsalytics.js",
+    "collect:hoopsalytics-boxscores": "node src/collect-hoopsalytics-boxscores.js",
     "summary": "node src/summarize.js",
     "article": "node src/article.js",
     "site": "node src/site.js",
