@@ -6,8 +6,8 @@
 //         node src/summarize.js 2026-06-29 # treat this stamp as "latest"
 import { mkdirSync, writeFileSync } from "node:fs";
 import {
-  listSnapshots, loadSnapshot, weeklyProduction, newlyFinalGames,
-  teamNameById, renderSummaryMarkdown,
+  listSnapshots, loadSnapshot, weeklyProduction, weeklyProductionFromBoxscores,
+  newlyFinalGames, teamNameById, renderSummaryMarkdown,
 } from "./lib.js";
 
 const stamps = listSnapshots();
@@ -27,9 +27,20 @@ const baseline = !prev;
 
 const names = teamNameById(curr);
 const teamOf = (id) => names.get(id) || "Unknown";
-const production = weeklyProduction(curr, prev);
 const games = newlyFinalGames(curr, prev);
 const prevRank = new Map((prev?.standings ?? []).map((t) => [t.team_id, t.rank]));
+
+// Prefer Hoopsalytics' real per-game box scores; fall back to the cumulative
+// TeamLinkt diff only when this week's box scores aren't published yet. The
+// diff is the lossy path — see weeklyProductionFromBoxscores() for why.
+const teamCodeByName = new Map(curr.players.map((p) => [p.Name, p.Team]));
+const boxProduction = weeklyProductionFromBoxscores(target, games, { teamCodeByName });
+const production = boxProduction ?? weeklyProduction(curr, prev);
+const source = boxProduction
+  ? `Player stats from Hoopsalytics per-game box scores for event(s) `
+    + `${games.map((g) => g.event_id).join(", ")}.`
+  : `Generated from ${target}` + (prev ? ` vs ${prev.stamp}` : ` (baseline)`)
+    + ` (cumulative-stats diff — no Hoopsalytics box scores available).`;
 
 const md = renderSummaryMarkdown({
   target,
@@ -39,7 +50,7 @@ const md = renderSummaryMarkdown({
   prevRank,
   production,
   teamOf,
-  sourceNote: `Generated from ${target}` + (prev ? ` vs ${prev.stamp}` : ` (baseline)`) + `.`,
+  sourceNote: source,
 });
 
 mkdirSync("summaries", { recursive: true });

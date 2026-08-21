@@ -22,10 +22,19 @@ Endpoints in play (association `10372`, current season `54723`):
 | Per-game box score | `getPlayerStatsForEvent/10372` | Currently empty — see below |
 
 ### The cumulative-stats problem (and the fix)
-The stats table only shows **season totals**. To know what someone did *this
-week*, the collector saves a timestamped snapshot every run; the analyzer diffs
-the two most recent snapshots. `thisWeek = thisSnapshot − lastSnapshot`, per
-player, per stat. That diff is the movers-and-shakers engine.
+The stats table only shows **season totals**, so the original approach was to
+snapshot it every run and diff the two most recent snapshots:
+`thisWeek = thisSnapshot − lastSnapshot`, per player, per stat.
+
+**That diff is no longer the primary source — Hoopsalytics box scores are.**
+TeamLinkt's cumulative table lags unpredictably: it sat on identical totals
+across the 2026-08-09 and 2026-08-19 snapshots, then caught up three games at
+once by 2026-08-21. Diffing across that produces a "week" containing however
+many games the table happened to catch up on — which is how a 55-45 game once
+reported an 81-point line. So `summarize.js` now prefers
+`weeklyProductionFromBoxscores()`, summing the real per-game Hoopsalytics box
+scores (see below) for exactly the games that went final this week, and falls
+back to the cumulative diff only when those box scores aren't published yet.
 
 ### Stats availability / timing
 Stats are produced by Hoopsalytics **over the weekend after game film is
@@ -69,7 +78,9 @@ Set `HOOPSALYTICS_EMAIL` in `.env` (see `.env.example`) before running it.
 ```
 src/collect.js             # Playwright collector (TeamLinkt) → writes a weekly snapshot
 src/collect-hoopsalytics.js # Playwright collector (Hoopsalytics) → advanced stats, draft board source
+src/collect-hoopsalytics-boxscores.js # Playwright collector (Hoopsalytics) → per-game box scores, weekly stat source
 src/draft.js                # draft board generator (valuation model + snake draft sim)
+src/draft-page.js           # renders <date>-draft.json into the published <date>-draft-board.html
 src/site.js                 # static-site builder → renders summaries/ into dist/ (the magazine)
 src/magazine.css            # magazine stylesheet (copied to dist/style.css on build)
 src/probe*.js                # one-off discovery scripts (kept for debugging)
@@ -100,8 +111,26 @@ npm run site                       # builds the magazine into dist/ (no API key 
 node src/article.js 2026-06-29     # render a specific snapshot as "latest"
 
 npm run collect:hoopsalytics       # writes data/snapshots/<today>/hoopsalytics_stats.json (needs HOOPSALYTICS_EMAIL)
+npm run collect:hoopsalytics-boxscores  # writes data/snapshots/<today>/hoopsalytics_boxscores/ — the weekly stat source
 npm run draft                      # writes summaries/<today>-draft.{md,json} from the latest snapshot
+npm run draft:page                 # renders that into summaries/<today>-draft-board.html (published as dist/draft.html)
 ```
+
+A full weekly run, in order:
+
+```bash
+npm run collect                        # TeamLinkt: schedule, scores, standings
+npm run collect:hoopsalytics           # Hoopsalytics: advanced per-player season stats
+npm run collect:hoopsalytics-boxscores # Hoopsalytics: per-game box scores (weekly stat lines)
+npm run summary                        # deterministic summary, from the box scores
+npm run article                        # AI recap (needs ANTHROPIC_API_KEY)
+npm run draft && npm run draft:page    # refresh the draft board
+npm run site                           # rebuild dist/
+```
+
+Note that `npm run weekly` still runs only the TeamLinkt collect → summary →
+article → site chain; run the two Hoopsalytics collectors before it if you want
+the summary sourced from real per-game box scores rather than the fallback diff.
 
 `npm run weekly` now ends by building the site, so a normal run produces the
 snapshot, both markdown outputs, **and** the rebuilt `dist/`.
@@ -119,10 +148,11 @@ produces two outputs from the same snapshot data:
   file as `ANTHROPIC_API_KEY=sk-ant-...` (copy `.env.example`), or export it in
   your shell. `.env` is gitignored.
 
-Leading scorers and weekly lines come from the snapshot diff: since each team
-plays once a week, a player's week-over-week stat delta *is* their line in that
-week's game. The first run is a baseline (no diff yet); movement and true
-per-week lines kick in on the second run.
+Leading scorers and weekly lines come from the Hoopsalytics per-game box scores
+for the games that went final that week — real per-game data, so a lagging
+cumulative table can't smear several games into one "week". If those box scores
+aren't available, the summary falls back to the snapshot diff (a player's
+week-over-week stat delta), and says so in its footer credit.
 
 ## Status
 
@@ -132,6 +162,7 @@ per-week lines kick in on the second run.
 - [x] **Summarizer** (`src/summarize.js`) — renders the deterministic `summaries/<date>.md`.
 - [x] **Article writer** (`src/article.js`) — Claude-written ESPN-style `summaries/<date>-article.md`.
 - [x] **Draft board** (`src/draft.js`) — valuation model + snake draft sim, sourced from Hoopsalytics. Manual step, not part of `npm run weekly`.
+- [x] **Draft board page** (`src/draft-page.js`) — renders the board JSON into the published HTML page.
 
 ### Possible next steps
 - Auto-email the article each week (your Gmail is connected to Claude Code).
@@ -145,10 +176,19 @@ standings, stat leaders). `src/site.js` renders `summaries/*.md` into a static
 magazine in `dist/` — plain HTML + one stylesheet, no framework.
 
 The masthead also links to a **Draft Board** page. `src/site.js` picks up the
-newest `summaries/<date>-draft-board.html` (a hand-built, self-contained page —
+newest `summaries/<date>-draft-board.html` (a self-contained page —
 title/style/script with the draft data inlined) and publishes it as
-`dist/draft.html`. Save a new one under that filename after a draft run to
-update the published board; if none exists, the nav link is simply omitted.
+`dist/draft.html`; if none exists, the nav link is simply omitted.
+
+`npm run draft:page` produces that file. The board's design was hand-built once
+and is carried forward as a template: the generator takes the most recent
+existing `-draft-board.html`, swaps in the new week's `DATA` blob from
+`summaries/<date>-draft.json`, and refreshes the derived numbers baked into the
+surrounding prose (player/round counts, the recorded-games denominator and its
+availability multiplier table, the GP range, the "Through &lt;date&gt;" line,
+the footer credit). Two lines are genuinely editorial — the value curve's note
+and the "Reading the board" paragraph — and are regenerated from the top of the
+board; reword them in `src/draft-page.js` if the board's shape changes.
 
 `dist/` is a build artifact (gitignored). It's published to **GitHub Pages** by
 `.github/workflows/pages.yml`, which runs on every push to `main`: it builds the

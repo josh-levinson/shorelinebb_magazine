@@ -83,6 +83,50 @@ export function weeklyProduction(curr, prev) {
   });
 }
 
+// Per-player weekly production summed from Hoopsalytics per-game box scores —
+// the preferred source, and the reason collect-hoopsalytics-boxscores.js exists.
+//
+// TeamLinkt's cumulative stats table lags badly and unpredictably: it sat on
+// identical totals across the 2026-08-09 and 2026-08-19 snapshots, then caught
+// up three games at once by 2026-08-21. A snapshot-to-snapshot diff of that
+// table therefore reports however many games the table happened to catch up on
+// as "this week" — which is how a 55-45 game produced an 81-point line.
+// Hoopsalytics is the league's actual stats provider and publishes real
+// per-game lines, so sum exactly this week's games instead of trusting a diff.
+//
+// Returns the same shape as weeklyProduction(). Returns null when not a single
+// one of `games` has a box score on disk, so callers can fall back to the diff.
+export function weeklyProductionFromBoxscores(stamp, games, { teamCodeByName } = {}) {
+  const dir = `${SNAP_ROOT}/${stamp}/hoopsalytics_boxscores`;
+  const byName = new Map();
+  let found = 0;
+
+  for (const g of games) {
+    const rows = readJSON(`${dir}/${g.event_id}.json`, null);
+    if (!rows?.length) continue;
+    found++;
+    for (const row of rows) {
+      const entry = byName.get(row.name) ?? {
+        name: row.name,
+        team_id: row.team_id,
+        team_code: teamCodeByName?.get(row.name) ?? null,
+        weekly: Object.fromEntries(COUNT_STATS.map((s) => [s, 0])),
+      };
+      // A team plays once a week, but sum rather than assign so this stays
+      // correct for a doubleheader or a backfilled multi-game span.
+      for (const s of COUNT_STATS) entry.weekly[s] += num(row.weekly?.[s]);
+      byName.set(row.name, entry);
+    }
+  }
+  if (found === 0) return null;
+
+  return [...byName.values()].map((p) => ({
+    ...p,
+    gp_week: p.weekly.GP,
+    played_this_week: Object.values(p.weekly).some((v) => v > 0),
+  }));
+}
+
 // Games finalized in `curr` that were NOT finalized in `prev` (or no prev) =
 // "this week's games".
 export function newlyFinalGames(curr, prev) {

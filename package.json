@@ -12,6 +12,7 @@
     "article": "node src/article.js",
     "site": "node src/site.js",
     "draft": "node src/draft.js",
+    "draft:page": "node src/draft-page.js",
     "backfill": "node src/backfill-recaps.js",
     "weekly": "node src/collect.js && node src/summarize.js && node src/article.js && node src/site.js"
   },

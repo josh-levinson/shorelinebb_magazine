@@ -1,0 +1,499 @@
+<title>Shoreline Draft Board — 2026</title>
+<style>
+:root{
+  --ground:#F6F7F9; --panel:#FFFFFF; --panel-2:#EFF2F5;
+  --ink:#111820; --ink-2:#48545F; --ink-3:#7B8792;
+  --rule:#DDE2E7; --rule-2:#EBEEF1;
+  --accent:#C0432B; --accent-2:#8E3320; --accent-soft:#F2DDD7;
+  --full:#2C6B4C; --full-bg:#E1EEE7;
+  --part:#846418; --part-bg:#F4EBD6;
+  --thin:#95483A; --thin-bg:#F5E1DC;
+  --shadow:0 1px 2px rgba(17,24,32,.05),0 4px 16px rgba(17,24,32,.05);
+}
+@media (prefers-color-scheme:dark){
+ :root:not([data-theme="light"]){
+  --ground:#0E1318; --panel:#151C23; --panel-2:#1B232B;
+  --ink:#E8ECF0; --ink-2:#A0ACB7; --ink-3:#6D7A86;
+  --rule:#28323B; --rule-2:#1F282F;
+  --accent:#DE6147; --accent-2:#F08A73; --accent-soft:#37201A;
+  --full:#6DBD90; --full-bg:#152E1E;
+  --part:#D2AE61; --part-bg:#2C2515;
+  --thin:#DC8977; --thin-bg:#311F1B;
+  --shadow:0 1px 2px rgba(0,0,0,.45),0 4px 18px rgba(0,0,0,.35);
+ }
+}
+:root[data-theme="dark"]{
+  --ground:#0E1318; --panel:#151C23; --panel-2:#1B232B;
+  --ink:#E8ECF0; --ink-2:#A0ACB7; --ink-3:#6D7A86;
+  --rule:#28323B; --rule-2:#1F282F;
+  --accent:#DE6147; --accent-2:#F08A73; --accent-soft:#37201A;
+  --full:#6DBD90; --full-bg:#152E1E;
+  --part:#D2AE61; --part-bg:#2C2515;
+  --thin:#DC8977; --thin-bg:#311F1B;
+  --shadow:0 1px 2px rgba(0,0,0,.45),0 4px 18px rgba(0,0,0,.35);
+}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--ground);color:var(--ink);
+  font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased;
+}
+.num{font-variant-numeric:tabular-nums}
+.cond{
+  font-family:"Haettenschweiler","Arial Narrow","Helvetica Neue",Impact,system-ui,sans-serif;
+  font-stretch:condensed;letter-spacing:.01em;
+}
+.wrap{max-width:1320px;margin:0 auto;padding:0 24px}
+a{color:var(--accent);text-underline-offset:2px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:2px}
+
+/* ---------- masthead ---------- */
+.mast{
+  border-bottom:2px solid var(--ink);
+  padding:38px 0 18px;margin-bottom:0;
+}
+.eyebrow{
+  font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--accent);font-weight:700;margin:0 0 10px;
+}
+.mast h1{
+  font-family:"Haettenschweiler","Arial Narrow","Helvetica Neue",Impact,system-ui,sans-serif;
+  font-stretch:condensed;
+  font-size:clamp(44px,8vw,86px);line-height:.92;margin:0;
+  letter-spacing:-.01em;text-transform:uppercase;text-wrap:balance;
+}
+.mast .sub{
+  display:flex;flex-wrap:wrap;gap:8px 22px;align-items:baseline;
+  margin-top:16px;color:var(--ink-2);font-size:13.5px;
+}
+.mast .sub b{color:var(--ink);font-weight:650}
+
+/* ---------- layout ---------- */
+/* minmax(0,…) on every breakpoint: grid items floor at min-content, and the
+   wide tables inside would otherwise force the column open past the viewport. */
+.cols{display:grid;grid-template-columns:minmax(0,1fr);gap:34px;padding-top:30px}
+@media(min-width:1000px){.cols{grid-template-columns:minmax(0,1fr) 300px;gap:36px;align-items:start}}
+.cols > main{min-width:0}
+
+section{margin-bottom:46px}
+h2.sec{
+  font-family:"Haettenschweiler","Arial Narrow","Helvetica Neue",Impact,system-ui,sans-serif;
+  font-stretch:condensed;text-transform:uppercase;
+  font-size:24px;letter-spacing:.02em;margin:0 0 4px;
+}
+.sec-note{color:var(--ink-2);font-size:13.5px;margin:0 0 18px;max-width:64ch}
+.rule{height:1px;background:var(--rule);border:0;margin:0 0 18px}
+
+/* ---------- board table ---------- */
+.tablewrap{overflow-x:auto;border:1px solid var(--rule);border-radius:6px;background:var(--panel);box-shadow:var(--shadow)}
+table{border-collapse:collapse;width:100%;min-width:900px;font-size:13.5px}
+thead th{
+  position:sticky;top:0;z-index:2;background:var(--panel-2);
+  text-align:right;padding:9px 10px;font-size:10.5px;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--ink-2);font-weight:700;
+  border-bottom:1px solid var(--rule);white-space:nowrap;
+}
+thead th.l{text-align:left}
+thead th[data-key]{cursor:pointer}
+thead th[data-key]:hover{color:var(--ink)}
+thead th.sorted{color:var(--accent)}
+thead th abbr{text-decoration:none;border-bottom:1px dotted var(--ink-3);cursor:help}
+.sortarrow{display:inline-block;margin-left:3px;font-size:8px;position:relative;top:-1px}
+tbody td{padding:8px 8px;text-align:right;border-bottom:1px solid var(--rule-2);white-space:nowrap}
+/* Value is the point of the board — pin it to the right edge so it stays
+   readable when the table scrolls internally at narrow widths. */
+th.valcol,td.val{
+  position:sticky;right:0;z-index:1;padding-right:12px;
+  box-shadow:-8px 0 8px -8px rgba(17,24,32,.16);
+}
+td.val{background:var(--panel)}
+th.valcol{background:var(--panel-2);z-index:3}
+tbody tr:hover td.val{background:var(--panel-2)}
+tr.band td{position:relative}
+tbody td.l{text-align:left}
+tbody tr:hover{background:var(--panel-2)}
+tbody tr:last-child td{border-bottom:0}
+.rk{color:var(--ink-3);font-weight:700;width:38px}
+.pname{font-weight:650;color:var(--ink)}
+.parch{color:var(--ink-3);font-size:11.5px;display:block;line-height:1.3;margin-top:1px}
+.tm{
+  display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.06em;
+  color:var(--ink-2);background:var(--panel-2);border:1px solid var(--rule);
+  padding:1px 6px;border-radius:3px;
+}
+.val{font-weight:700}
+.val.pos{color:var(--accent)}
+.gp{font-weight:650}
+.att{display:inline-flex;align-items:center;gap:6px;justify-content:flex-end}
+.attbar{width:34px;height:5px;border-radius:3px;background:var(--rule);overflow:hidden;flex:none}
+.attbar i{display:block;height:100%;border-radius:3px}
+.a-full i{background:var(--full)} .a-part i{background:var(--part)} .a-thin i{background:var(--thin)}
+.a-full .attn{color:var(--full)} .a-part .attn{color:var(--part)} .a-thin .attn{color:var(--thin)}
+.attn{font-size:11.5px;font-weight:700;min-width:30px;text-align:right}
+
+/* tier band row */
+tr.band td{
+  background:var(--ground);border-bottom:1px solid var(--rule);
+  padding:7px 10px;text-align:left;
+}
+tr.band .bandin{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.bandname{
+  font-family:"Haettenschweiler","Arial Narrow","Helvetica Neue",Impact,system-ui,sans-serif;
+  font-stretch:condensed;text-transform:uppercase;letter-spacing:.05em;
+  font-size:14px;color:var(--ink);
+}
+.bandmeta{font-size:11px;color:var(--ink-3);letter-spacing:.02em}
+.bandkey{width:3px;height:13px;border-radius:2px;background:var(--accent);display:inline-block;flex:none;position:relative;top:1px}
+
+/* ---------- sidebar ---------- */
+.rail{display:flex;flex-direction:column;gap:20px}
+@media(min-width:1000px){.rail{position:sticky;top:18px}}
+.card{
+  background:var(--panel);border:1px solid var(--rule);border-radius:6px;
+  padding:17px 18px;box-shadow:var(--shadow);
+}
+.card h3{
+  font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--accent);margin:0 0 11px;font-weight:700;
+}
+.card p{margin:0 0 10px;font-size:12.8px;color:var(--ink-2);line-height:1.6}
+.card p:last-child{margin-bottom:0}
+.card b{color:var(--ink);font-weight:650}
+.formula{
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:11.5px;background:var(--panel-2);border:1px solid var(--rule);
+  border-radius:4px;padding:8px 10px;color:var(--ink-2);
+  overflow-x:auto;white-space:pre;margin:0 0 10px;
+}
+.kv{display:flex;justify-content:space-between;gap:12px;font-size:12.5px;padding:4px 0;border-bottom:1px solid var(--rule-2)}
+.kv:last-child{border-bottom:0}
+.kv span{color:var(--ink-2)} .kv b{font-weight:650}
+
+/* weight bars */
+.wrow{display:grid;grid-template-columns:58px 1fr 34px;gap:9px;align-items:center;font-size:12px;padding:3px 0}
+.wbar{height:6px;background:var(--rule);border-radius:3px;overflow:hidden;position:relative}
+.wbar i{position:absolute;top:0;bottom:0;border-radius:3px;background:var(--accent)}
+.wbar i.neg{background:var(--ink-3)}
+.wlab{color:var(--ink-2)} .wnum{text-align:right;color:var(--ink-3);font-size:11.5px}
+
+/* ---------- tier curve ---------- */
+.curve{background:var(--panel);border:1px solid var(--rule);border-radius:6px;padding:16px 18px 12px;box-shadow:var(--shadow)}
+.curve svg{width:100%;max-width:100%;height:132px;display:block}
+.curvekey{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:12px;font-size:11.5px;color:var(--ink-2)}
+.curvekey i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;position:relative;top:1px}
+
+/* ---------- draft grid ---------- */
+.gridwrap{overflow-x:auto;border:1px solid var(--rule);border-radius:6px;background:var(--panel);box-shadow:var(--shadow)}
+table.draft{min-width:940px;font-size:12.5px}
+table.draft thead th{text-align:left}
+table.draft td{text-align:left;vertical-align:top;padding:9px 10px}
+table.draft td.rd{
+  text-align:center;color:var(--ink-3);font-weight:700;width:40px;
+  background:var(--panel-2);border-right:1px solid var(--rule);
+}
+.pk{font-weight:600;display:block;line-height:1.3}
+.pk .pt{color:var(--ink-3);font-weight:500;font-size:11px}
+
+/* rosters */
+.rosters{display:grid;grid-template-columns:repeat(auto-fill,minmax(258px,1fr));gap:16px;margin-top:20px}
+.ros{background:var(--panel);border:1px solid var(--rule);border-radius:6px;padding:15px 16px;box-shadow:var(--shadow)}
+.ros h4{margin:0 0 3px;font-size:14px;font-weight:700}
+.rosmeta{font-size:11px;color:var(--ink-3);margin:0 0 11px;letter-spacing:.02em}
+.ros ol{margin:0;padding:0;list-style:none;counter-reset:p}
+.ros li{
+  counter-increment:p;display:grid;grid-template-columns:16px 1fr auto;gap:8px;
+  padding:4px 0;border-bottom:1px solid var(--rule-2);font-size:12.5px;align-items:baseline;
+}
+.ros li:last-child{border-bottom:0}
+.ros li::before{content:counter(p);color:var(--ink-3);font-size:10.5px;font-weight:700}
+.ros li .rn{font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ros li .rg{color:var(--ink-3);font-size:11px}
+
+/* callout */
+.callout{
+  border-left:3px solid var(--accent);background:var(--accent-soft);
+  padding:13px 16px;border-radius:0 5px 5px 0;font-size:13px;color:var(--ink-2);
+}
+.callout b{color:var(--ink)}
+footer{border-top:1px solid var(--rule);margin-top:14px;padding:22px 0 60px;color:var(--ink-3);font-size:12px}
+</style>
+
+<div class="wrap">
+
+  <header class="mast">
+    <p class="eyebrow">Shoreline Men's League · Redraft</p>
+    <h1>The Draft Board</h1>
+    <div class="sub">
+      <span><b>48</b> players</span>
+      <span><b>6</b> teams · 8 rounds</span>
+      <span><b>9</b> games of recorded stats</span>
+      <span>Through <b>August 21, 2026</b></span>
+    </div>
+  </header>
+
+  <div class="cols">
+    <main>
+
+      <section>
+        <h2 class="sec">Value Curve</h2>
+        <p class="sec-note">Tier cuts follow the natural gaps in the value curve, not fixed bucket sizes. Jeremy McDonald and Ryan Florentine sit alone in the top tier, and the drop from 9.9 to 6.2 behind them is the widest gap on the board.</p>
+        <div class="curve" id="curve"></div>
+        <div class="curvekey" id="curvekey"></div>
+      </section>
+
+      <section>
+        <h2 class="sec">The Big Board</h2>
+        <p class="sec-note">Ranked by composite value. Every player is scored on per-game production, regressed toward replacement level by sample size, then scaled by attendance.</p>
+        <div class="tablewrap">
+          <table>
+            <thead>
+              <tr>
+                <th class="l" data-key="r" title="Overall rank by composite value">#</th>
+                <th class="l" data-key="n">Player</th>
+                <th class="l" data-key="t">Tm</th>
+                <th data-key="g"><abbr title="Games played">GP</abbr></th>
+                <th data-key="p"><abbr title="Points per game">PPG</abbr></th>
+                <th data-key="rb"><abbr title="Rebounds per game">RPG</abbr></th>
+                <th data-key="as"><abbr title="Assists per game">APG</abbr></th>
+                <th data-key="s"><abbr title="Steals per game">SPG</abbr></th>
+                <th data-key="b"><abbr title="Blocks per game">BPG</abbr></th>
+                <th data-key="dfl"><abbr title="Deflections per game — passes or dribbles disrupted; a hustle stat separate from steals and blocks">Defl</abbr></th>
+                <th data-key="ppp"><abbr title="Net points per possession while the player is on court (Off. PPP − Def. PPP)">PPP</abbr></th>
+                <th data-key="ts"><abbr title="True Shooting % — scoring efficiency accounting for 2s, 3s, and free throws">TS%</abbr></th>
+                <th data-key="top"><abbr title="Turnovers per 100 plays — lower is better">TO%</abbr></th>
+                <th data-key="at"><abbr title="Availability multiplier — attendance against the games with recorded stats, scaled into value">Avail</abbr></th>
+                <th class="valcol" data-key="v"><abbr title="Composite value score — the number the board is ranked on">Value</abbr></th>
+              </tr>
+            </thead>
+            <tbody id="board"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="sec">Simulated Snake Draft</h2>
+        <p class="sec-note">Best player available straight down the board, order reversing each round. Team slots are generic — this is a full redraft of the pool.</p>
+        <div class="gridwrap">
+          <table class="draft">
+            <thead><tr id="dhead"></tr></thead>
+            <tbody id="dbody"></tbody>
+          </table>
+        </div>
+        <div class="rosters" id="rosters"></div>
+      </section>
+
+    </main>
+
+    <aside class="rail">
+      <div class="card">
+        <h3>How value is built</h3>
+        <p><b>1 · Per-game rates.</b> Games played range from 2 to 9, so season totals would just rank whoever showed up most. Rates level the field first.</p>
+        <p><b>2 · Reliability.</b> Rates regress toward replacement level — the 25th percentile of the pool — by sample size. A 30-point average over three games is a weaker claim than the same average over nine. The baseline is replacement level rather than the league mean on purpose: regressing toward the mean quietly rewards a below-average player for missing games, which punishes exactly the people who keep showing up.</p>
+        <div class="formula">adj = (GP·rate + 2·replacement) / (GP + 2)</div>
+        <p><b>3 · Composite.</b> Ten categories, standardized across the pool so a rebound and an assist carry comparable weight, then weighted below. Deflections and Net PPP (on-court point differential per possession) come from Hoopsalytics' advanced views rather than the box score; turnovers are scored as TO% (turnovers per 100 plays) instead of a raw per-game count, since raw count just rewards low usage.</p>
+        <p><b>4 · Availability.</b> Attendance against the 9 games of recorded stats, scaled into the final value.</p>
+        <div class="formula">×1.12 at 9/9   ×0.96 at 5/9
+×0.84 at 2/9   ×0.80 at 1/9</div>
+        <p>Teams forfeit when they can't field a roster, so showing up carries real value on its own — but it's deliberately tuned as a <b>secondary</b> factor. It moves players between tiers without letting a role player outrank an elite producer.</p>
+      </div>
+
+      <div class="card">
+        <h3>Category weights</h3>
+        <div id="weights"></div>
+      </div>
+
+      <div class="card">
+        <h3>What availability changed</h3>
+        <p>Rank shift versus a production-only board:</p>
+        <div class="kv"><span>Jeffrey Luman <b>7 GP</b></span><b style="color:var(--full)">↑ 4</b></div>
+        <div class="kv"><span>Samim Jabarkhail <b>7 GP</b></span><b style="color:var(--full)">↑ 4</b></div>
+        <div class="kv"><span>Jon Fiorillo <b>7 GP</b></span><b style="color:var(--full)">↑ 4</b></div>
+        <div class="kv"><span>Josh Carter <b>2 GP</b></span><b style="color:var(--thin)">↓ 7</b></div>
+        <div class="kv"><span>Dan Greif <b>3 GP</b></span><b style="color:var(--thin)">↓ 6</b></div>
+        <p style="margin-top:11px">The top five move by at most one spot — production still decides the premium picks.</p>
+      </div>
+
+      <div class="card">
+        <h3>Data caveat</h3>
+        <p>Every team has played <b>8</b> games and the stat table carries all <b>8</b> — no lag this snapshot, unlike the prior one. Per-event box scores are still published empty, so every rate here comes from season totals divided by games played.</p>
+      </div>
+    </aside>
+  </div>
+
+  <div class="callout wrap" style="padding-left:16px;margin-bottom:10px">
+    <b>Reading the board.</b> Jeremy McDonald takes the top pick from Ryan Florentine on a near-identical scoring average — 25.3 to 25.6 — because he pairs it with rebounding and defensive numbers Florentine doesn't match, over 6 appearances to 8. Florentine's 64.0% true-shooting is the best mark in the pool and keeps it close, but the composite rewards the wider spread.
+  </div>
+
+  <footer class="wrap" style="padding-left:0;padding-right:0">
+    Generated from the 2026-08-21 snapshot of hoopsalytics.com · <span class="num">48</span> players · stats are cumulative season totals published by Hoopsalytics, the league's stats provider.
+  </footer>
+</div>
+
+<script>
+const DATA = {"stamp":"2026-08-21","tier_names":["Franchise","Core Starter","Starter","Rotation","Bench","Depth"],"model":{"shrink_k":2,"shrink_target":"replacement","replacement_pctile":0.25,"replacement_values":{"pts":3.167,"reb":3,"ast":0.625,"stl":0.429,"blk":0,"deflect":0.571,"netppp":-0.1,"ts":30.5,"to_pct":17.5,"foul_rate":3.991},"att_base":0.76,"att_slope":0.36,"games_with_stats":9,"weights":{"pts":1,"reb":0.7,"ast":0.7,"stl":0.5,"blk":0.4,"deflect":0.3,"netppp":0.6,"ts":0.4,"to_pct":-0.4,"foul_rate":-0.25}},"players":[{"r":1,"n":"Jeremy McDonald","t":"Green Wave","tm":"Green Wave","g":6,"ti":0,"a":"Scorer / Rebounder","p":25.33,"rb":14.83,"as":3.5,"s":3.67,"b":0.83,"dfl":3,"ppp":0.21,"ts":44.7,"top":12.1,"fl":3.39,"at":0.667,"v":10.326,"base":10.326},{"r":2,"n":"Ryan Florentine","t":"Huskies","tm":"Huskies","g":8,"ti":0,"a":"Scorer / Defender","p":25.63,"rb":8.5,"as":2,"s":2.25,"b":1,"dfl":3.13,"ppp":0.09,"ts":64,"top":5.7,"fl":2.71,"at":0.889,"v":9.886,"base":8.783},{"r":3,"n":"Taylor Houghton","t":"Knicks","tm":"Knicks","g":5,"ti":1,"a":"Scorer / Defender","p":18.8,"rb":8.4,"as":2.4,"s":2.8,"b":1,"dfl":3.8,"ppp":0.12,"ts":47.8,"top":11.4,"fl":1.37,"at":0.556,"v":6.222,"base":6.689},{"r":4,"n":"Neil Anglemire","t":"Huskies","tm":"Huskies","g":5,"ti":1,"a":"Rebounder / Playmaker","p":9,"rb":20.2,"as":4,"s":2,"b":0.4,"dfl":2,"ppp":0.2,"ts":52.1,"top":20,"fl":4.95,"at":0.556,"v":5.843,"base":6.294},{"r":5,"n":"Jimmy Giorlamo","t":"Green Wave","tm":"Green Wave","g":5,"ti":1,"a":"Scorer / Playmaker","p":21.4,"rb":5.2,"as":3,"s":3.4,"b":0.8,"dfl":1.8,"ppp":0.1,"ts":50.4,"top":10,"fl":3.99,"at":0.556,"v":5.483,"base":5.92},{"r":6,"n":"David Orr","t":"Red Storm","tm":"Red Storm","g":7,"ti":1,"a":"Scorer / Rebounder","p":19.29,"rb":10.43,"as":1.71,"s":1.14,"b":0.86,"dfl":1.29,"ppp":0.07,"ts":49.4,"top":12.5,"fl":2.15,"at":0.778,"v":5.475,"base":5.072},{"r":7,"n":"Paul Votto","t":"Black Mamba","tm":"Black Mamba","g":8,"ti":2,"a":"Playmaker / Defender","p":10.38,"rb":7.75,"as":2.75,"s":1,"b":0.13,"dfl":2.5,"ppp":-0.01,"ts":48.8,"top":13.7,"fl":3.99,"at":0.889,"v":3.171,"base":2.566},{"r":8,"n":"Branden LaPia","t":"Red Storm","tm":"Red Storm","g":6,"ti":2,"a":"Playmaker","p":9.67,"rb":5.67,"as":3.83,"s":1.5,"b":0.17,"dfl":1.67,"ppp":0.09,"ts":43.8,"top":15,"fl":3.65,"at":0.667,"v":2.716,"base":2.716},{"r":9,"n":"Shawn Love","t":"Green Wave","tm":"Green Wave","g":6,"ti":2,"a":"Complementary Scorer","p":12,"rb":4.67,"as":1.17,"s":1.67,"b":0.17,"dfl":0.83,"ppp":0.12,"ts":44.1,"top":3.5,"fl":0.9,"at":0.667,"v":2.198,"base":2.198},{"r":10,"n":"Khalid Jabarkhail","t":"Bulldogs","tm":"Bulldogs","g":7,"ti":2,"a":"Scorer / Defender","p":17.57,"rb":5.86,"as":0.57,"s":1,"b":0.57,"dfl":2.57,"ppp":-0.14,"ts":44.7,"top":10.8,"fl":3.95,"at":0.778,"v":1.809,"base":1.547},{"r":11,"n":"Tyler Copple","t":"Green Wave","tm":"Green Wave","g":7,"ti":3,"a":"Playmaker / Efficient","p":6.57,"rb":5.86,"as":2.86,"s":0.43,"b":0.43,"dfl":1.29,"ppp":0.16,"ts":47.1,"top":13.8,"fl":5.9,"at":0.778,"v":1.734,"base":1.475},{"r":12,"n":"Colby Morawski","t":"Black Mamba","tm":"Black Mamba","g":7,"ti":3,"a":"Scorer","p":16.14,"rb":7,"as":1.86,"s":0.29,"b":0,"dfl":1,"ppp":-0.02,"ts":42.8,"top":11.6,"fl":2.52,"at":0.778,"v":1.727,"base":1.468},{"r":13,"n":"Brian Jackson","t":"Knicks","tm":"Knicks","g":6,"ti":3,"a":"Playmaker","p":10.83,"rb":6.5,"as":2.83,"s":1.67,"b":0,"dfl":0.83,"ppp":-0.01,"ts":38.6,"top":15.7,"fl":1.96,"at":0.667,"v":1.562,"base":1.562},{"r":14,"n":"Jason Erxleben","t":"Red Storm","tm":"Red Storm","g":6,"ti":3,"a":"Complementary Scorer","p":13.33,"rb":8.17,"as":1.67,"s":0.83,"b":0.17,"dfl":1,"ppp":0.01,"ts":38.7,"top":8.6,"fl":4.44,"at":0.667,"v":1.338,"base":1.338},{"r":15,"n":"Samim Jabarkhail","t":"Black Mamba","tm":"Black Mamba","g":8,"ti":3,"a":"Rebounder","p":9.13,"rb":9.13,"as":2.38,"s":1.38,"b":0.13,"dfl":1.13,"ppp":-0.1,"ts":34,"top":18.4,"fl":3.88,"at":0.889,"v":1.244,"base":0.782},{"r":16,"n":"Scott Houghton","t":"Huskies","tm":"Huskies","g":8,"ti":3,"a":"Complementary Scorer","p":9.5,"rb":2.75,"as":1.38,"s":0.63,"b":0.38,"dfl":0.75,"ppp":0.05,"ts":30.8,"top":3.8,"fl":1.2,"at":0.889,"v":0.901,"base":0.464},{"r":17,"n":"Enrique Rivera","t":"Green Wave","tm":"Green Wave","g":7,"ti":3,"a":"Winner","p":2.14,"rb":3.43,"as":1.14,"s":0.71,"b":0,"dfl":0.71,"ppp":0.22,"ts":50,"top":0,"fl":0.81,"at":0.778,"v":0.881,"base":0.655},{"r":18,"n":"Jon Fiorillo","t":"Huskies","tm":"Huskies","g":8,"ti":3,"a":"Playmaker","p":4.75,"rb":4,"as":3,"s":1,"b":0,"dfl":1.38,"ppp":0.09,"ts":30.6,"top":16.7,"fl":2.15,"at":0.889,"v":0.803,"base":0.374},{"r":19,"n":"Jeffrey Luman","t":"Green Wave","tm":"Green Wave","g":7,"ti":3,"a":"Defender / Winner","p":2,"rb":7.29,"as":1.14,"s":1.14,"b":0.71,"dfl":1.57,"ppp":0.16,"ts":24.4,"top":9.4,"fl":4.13,"at":0.778,"v":0.708,"base":0.488},{"r":20,"n":"Scott Edmond","t":"Knicks","tm":"Knicks","g":6,"ti":3,"a":"Defender","p":6.17,"rb":6.83,"as":2,"s":0.33,"b":1,"dfl":1.17,"ppp":-0.04,"ts":32,"top":14.7,"fl":1.38,"at":0.667,"v":0.565,"base":0.565},{"r":21,"n":"Dan Gardner","t":"Red Storm","tm":"Red Storm","g":7,"ti":3,"a":"Glass Work","p":4.29,"rb":6.86,"as":2.43,"s":1.43,"b":0,"dfl":1,"ppp":0.06,"ts":33,"top":13,"fl":4.19,"at":0.778,"v":0.542,"base":0.329},{"r":22,"n":"Dan Scandalito","t":"Bulldogs","tm":"Bulldogs","g":4,"ti":3,"a":"Complementary Scorer","p":14,"rb":6,"as":2.75,"s":1,"b":0,"dfl":0.75,"ppp":-0.05,"ts":45.3,"top":12.5,"fl":3.9,"at":0.444,"v":0.296,"base":0.756},{"r":23,"n":"Eric Hogarth","t":"Knicks","tm":"Knicks","g":6,"ti":3,"a":"Defender","p":5.83,"rb":7.17,"as":1.33,"s":0.5,"b":0.83,"dfl":2.17,"ppp":0.02,"ts":38.3,"top":20.7,"fl":4.61,"at":0.667,"v":0.051,"base":0.051},{"r":24,"n":"Mike Iannuzzi","t":"Black Mamba","tm":"Black Mamba","g":8,"ti":3,"a":"Depth","p":8.5,"rb":4.5,"as":0.25,"s":1.25,"b":0.13,"dfl":1,"ppp":-0.02,"ts":38.2,"top":6.3,"fl":2.94,"at":0.889,"v":-0.111,"base":-0.473},{"r":25,"n":"Dan Greif","t":"Black Mamba","tm":"Black Mamba","g":3,"ti":3,"a":"Glass Work","p":6.67,"rb":9,"as":1,"s":2,"b":0.33,"dfl":1.33,"ppp":0.1,"ts":36.3,"top":15.2,"fl":1.45,"at":0.333,"v":-0.171,"base":0.487},{"r":26,"n":"Mason Carey","t":"Bulldogs","tm":"Bulldogs","g":9,"ti":3,"a":"Glass Work","p":7.67,"rb":7.89,"as":0.44,"s":0.56,"b":0.56,"dfl":0.44,"ppp":-0.14,"ts":39,"top":12.6,"fl":2.95,"at":1,"v":-0.299,"base":-0.803},{"r":27,"n":"Jeremy Staub","t":"Knicks","tm":"Knicks","g":7,"ti":3,"a":"Depth","p":7.71,"rb":4.71,"as":0.86,"s":1.14,"b":0.14,"dfl":0.86,"ppp":-0.03,"ts":37.7,"top":8.9,"fl":2.93,"at":0.778,"v":-0.379,"base":-0.557},{"r":28,"n":"Josh Carter","t":"Huskies","tm":"Huskies","g":2,"ti":3,"a":"Depth","p":10,"rb":6.5,"as":3.5,"s":0.5,"b":0,"dfl":0,"ppp":0.17,"ts":40.8,"top":7.4,"fl":1.15,"at":0.222,"v":-0.521,"base":0.332},{"r":29,"n":"Dimitrios Varrias","t":"Bulldogs","tm":"Bulldogs","g":6,"ti":4,"a":"Playmaker","p":4.5,"rb":6.67,"as":3.5,"s":0.5,"b":0.17,"dfl":1.67,"ppp":-0.05,"ts":30.9,"top":30.2,"fl":4.97,"at":0.667,"v":-1.02,"base":-1.02},{"r":30,"n":"Joe Flaherty","t":"Bulldogs","tm":"Bulldogs","g":8,"ti":4,"a":"Depth","p":5.25,"rb":4.5,"as":1.63,"s":0.63,"b":0.25,"dfl":0.63,"ppp":-0.16,"ts":43.7,"top":21,"fl":1.61,"at":0.889,"v":-1.376,"base":-1.644},{"r":31,"n":"Alex Hetherington","t":"Knicks","tm":"Knicks","g":5,"ti":4,"a":"Efficient","p":8.8,"rb":3.8,"as":1.2,"s":1,"b":0,"dfl":0.8,"ppp":-0.1,"ts":48,"top":14.8,"fl":5,"at":0.556,"v":-1.674,"base":-1.535},{"r":32,"n":"Anthoni Reyes","t":"Bulldogs","tm":"Bulldogs","g":7,"ti":4,"a":"Defender","p":6.29,"rb":2.57,"as":1.86,"s":1.86,"b":0,"dfl":0.71,"ppp":-0.15,"ts":38.7,"top":21.6,"fl":3.8,"at":0.778,"v":-1.696,"base":-1.823},{"r":33,"n":"James Holt","t":"Red Storm","tm":"Red Storm","g":8,"ti":4,"a":"Depth","p":5.38,"rb":2,"as":0.63,"s":0.5,"b":0.13,"dfl":0,"ppp":0.01,"ts":37.8,"top":12.3,"fl":1.64,"at":0.889,"v":-1.917,"base":-2.146},{"r":34,"n":"John DeMetro","t":"Huskies","tm":"Huskies","g":6,"ti":4,"a":"Winner","p":4.17,"rb":3,"as":0.5,"s":0.17,"b":0,"dfl":0.83,"ppp":0.16,"ts":30.5,"top":14.3,"fl":2.29,"at":0.667,"v":-2.107,"base":-2.107},{"r":35,"n":"Jay Canth","t":"Black Mamba","tm":"Black Mamba","g":3,"ti":4,"a":"Depth","p":2.67,"rb":2.67,"as":0,"s":0.67,"b":0.33,"dfl":0.67,"ppp":0.17,"ts":30.8,"top":0,"fl":2.63,"at":0.333,"v":-2.186,"base":-1.802},{"r":36,"n":"Colin Ryan","t":"Red Storm","tm":"Red Storm","g":7,"ti":4,"a":"Glass Work","p":5.57,"rb":6.86,"as":0.43,"s":0.43,"b":0.14,"dfl":0.71,"ppp":-0.13,"ts":40.2,"top":16.9,"fl":4.72,"at":0.778,"v":-2.383,"base":-2.484},{"r":37,"n":"Blake Walker","t":"Bulldogs","tm":"Bulldogs","g":8,"ti":4,"a":"Depth","p":4,"rb":4.25,"as":1.75,"s":0.5,"b":0,"dfl":0.25,"ppp":-0.11,"ts":30.7,"top":17.5,"fl":3.86,"at":0.889,"v":-2.621,"base":-2.797},{"r":38,"n":"Doug Brackney","t":"Red Storm","tm":"Red Storm","g":6,"ti":4,"a":"Depth","p":3.17,"rb":4.5,"as":0.67,"s":0.5,"b":0.17,"dfl":0.83,"ppp":-0.06,"ts":30.8,"top":18.4,"fl":2.26,"at":0.667,"v":-2.778,"base":-2.778},{"r":39,"n":"Patrick Boutilier","t":"Green Wave","tm":"Green Wave","g":5,"ti":4,"a":"Depth","p":5,"rb":3,"as":1.6,"s":0.4,"b":0,"dfl":0.2,"ppp":0.01,"ts":20.8,"top":14.3,"fl":3.4,"at":0.556,"v":-2.793,"base":-2.701},{"r":40,"n":"Devin Ye","t":"Green Wave","tm":"Green Wave","g":5,"ti":4,"a":"Depth","p":0.6,"rb":3.4,"as":0.6,"s":1,"b":0,"dfl":1.6,"ppp":0.15,"ts":16.7,"top":10,"fl":6.79,"at":0.556,"v":-2.939,"base":-2.853},{"r":41,"n":"Randy Howe","t":"Knicks","tm":"Knicks","g":5,"ti":4,"a":"Depth","p":1.6,"rb":3,"as":1.6,"s":0.8,"b":0.4,"dfl":0.4,"ppp":0.02,"ts":26.7,"top":37.5,"fl":2.76,"at":0.556,"v":-3.415,"base":-3.349},{"r":42,"n":"Mike Rothstein","t":"Huskies","tm":"Huskies","g":7,"ti":4,"a":"Depth","p":1.14,"rb":1.29,"as":1,"s":0.71,"b":0,"dfl":0.43,"ppp":0.01,"ts":20,"top":16.7,"fl":2.44,"at":0.778,"v":-3.66,"base":-3.711},{"r":43,"n":"Justin Rozen","t":"Black Mamba","tm":"Black Mamba","g":6,"ti":4,"a":"Depth","p":3.67,"rb":3.67,"as":1,"s":0.17,"b":0.5,"dfl":0.5,"ppp":-0.19,"ts":18.4,"top":10.4,"fl":4.68,"at":0.667,"v":-3.669,"base":-3.669},{"r":44,"n":"Allen Bellantoni","t":"Knicks","tm":"Knicks","g":6,"ti":5,"a":"Depth","p":0.33,"rb":1.17,"as":0.33,"s":0.33,"b":0.33,"dfl":1,"ppp":-0.14,"ts":11.1,"top":10,"fl":2.11,"at":0.667,"v":-4.613,"base":-4.613},{"r":45,"n":"Sean Perkins","t":"Huskies","tm":"Huskies","g":4,"ti":5,"a":"Defender","p":1,"rb":2.25,"as":0.25,"s":0.25,"b":1.25,"dfl":0,"ppp":-0.16,"ts":16.7,"top":20,"fl":5.95,"at":0.444,"v":-4.721,"base":-4.697},{"r":46,"n":"Mike Oberempt","t":"Red Storm","tm":"Red Storm","g":8,"ti":5,"a":"Depth","p":1,"rb":1.75,"as":1.13,"s":0,"b":0,"dfl":0,"ppp":-0.09,"ts":26.7,"top":28.6,"fl":0.9,"at":0.889,"v":-4.901,"base":-4.908},{"r":47,"n":"Josh Levinson","t":"Black Mamba","tm":"Black Mamba","g":8,"ti":5,"a":"Depth","p":1.63,"rb":3.88,"as":0.13,"s":0.25,"b":0,"dfl":0.25,"ppp":-0.2,"ts":28.3,"top":20.7,"fl":1.49,"at":0.889,"v":-4.938,"base":-4.943},{"r":48,"n":"Chris Cordeiro","t":"Bulldogs","tm":"Bulldogs","g":7,"ti":5,"a":"Depth","p":1.43,"rb":1.14,"as":0.14,"s":0,"b":0,"dfl":0.57,"ppp":-0.2,"ts":26.3,"top":24,"fl":1.42,"at":0.778,"v":-5.856,"base":-5.824}],"rosters":[{"slot":1,"total_value":2.47,"avg_gp":6.5,"picks":[{"round":1,"name":"Jeremy McDonald","team_code":"Green Wave","archetype":"Scorer / Rebounder"},{"round":2,"name":"Colby Morawski","team_code":"Black Mamba","archetype":"Scorer"},{"round":3,"name":"Brian Jackson","team_code":"Knicks","archetype":"Playmaker"},{"round":4,"name":"Mike Iannuzzi","team_code":"Black Mamba","archetype":"Depth"},{"round":5,"name":"Dan Greif","team_code":"Black Mamba","archetype":"Glass Work"},{"round":6,"name":"Colin Ryan","team_code":"Red Storm","archetype":"Glass Work"},{"round":7,"name":"Blake Walker","team_code":"Bulldogs","archetype":"Depth"},{"round":8,"name":"Chris Cordeiro","team_code":"Bulldogs","archetype":"Depth"}]},{"slot":2,"total_value":2.81,"avg_gp":6.63,"picks":[{"round":1,"name":"Ryan Florentine","team_code":"Huskies","archetype":"Scorer / Defender"},{"round":2,"name":"Tyler Copple","team_code":"Green Wave","archetype":"Playmaker / Efficient"},{"round":3,"name":"Jason Erxleben","team_code":"Red Storm","archetype":"Complementary Scorer"},{"round":4,"name":"Eric Hogarth","team_code":"Knicks","archetype":"Defender"},{"round":5,"name":"Mason Carey","team_code":"Bulldogs","archetype":"Glass Work"},{"round":6,"name":"Jay Canth","team_code":"Black Mamba","archetype":"Depth"},{"round":7,"name":"Doug Brackney","team_code":"Red Storm","archetype":"Depth"},{"round":8,"name":"Josh Levinson","team_code":"Black Mamba","archetype":"Depth"}]},{"slot":3,"total_value":-0.61,"avg_gp":6.25,"picks":[{"round":1,"name":"Taylor Houghton","team_code":"Knicks","archetype":"Scorer / Defender"},{"round":2,"name":"Khalid Jabarkhail","team_code":"Bulldogs","archetype":"Scorer / Defender"},{"round":3,"name":"Samim Jabarkhail","team_code":"Black Mamba","archetype":"Rebounder"},{"round":4,"name":"Dan Scandalito","team_code":"Bulldogs","archetype":"Complementary Scorer"},{"round":5,"name":"Jeremy Staub","team_code":"Knicks","archetype":"Depth"},{"round":6,"name":"John DeMetro","team_code":"Huskies","archetype":"Winner"},{"round":7,"name":"Patrick Boutilier","team_code":"Green Wave","archetype":"Depth"},{"round":8,"name":"Mike Oberempt","team_code":"Red Storm","archetype":"Depth"}]},{"slot":4,"total_value":-0.61,"avg_gp":5.63,"picks":[{"round":1,"name":"Neil Anglemire","team_code":"Huskies","archetype":"Rebounder / Playmaker"},{"round":2,"name":"Shawn Love","team_code":"Green Wave","archetype":"Complementary Scorer"},{"round":3,"name":"Scott Houghton","team_code":"Huskies","archetype":"Complementary Scorer"},{"round":4,"name":"Dan Gardner","team_code":"Red Storm","archetype":"Glass Work"},{"round":5,"name":"Josh Carter","team_code":"Huskies","archetype":"Depth"},{"round":6,"name":"James Holt","team_code":"Red Storm","archetype":"Depth"},{"round":7,"name":"Devin Ye","team_code":"Green Wave","archetype":"Depth"},{"round":8,"name":"Sean Perkins","team_code":"Huskies","archetype":"Defender"}]},{"slot":5,"total_value":-1.1,"avg_gp":6,"picks":[{"round":1,"name":"Jimmy Giorlamo","team_code":"Green Wave","archetype":"Scorer / Playmaker"},{"round":2,"name":"Branden LaPia","team_code":"Red Storm","archetype":"Playmaker"},{"round":3,"name":"Enrique Rivera","team_code":"Green Wave","archetype":"Winner"},{"round":4,"name":"Scott Edmond","team_code":"Knicks","archetype":"Defender"},{"round":5,"name":"Dimitrios Varrias","team_code":"Bulldogs","archetype":"Playmaker"},{"round":6,"name":"Anthoni Reyes","team_code":"Bulldogs","archetype":"Defender"},{"round":7,"name":"Randy Howe","team_code":"Knicks","archetype":"Depth"},{"round":8,"name":"Allen Bellantoni","team_code":"Knicks","archetype":"Depth"}]},{"slot":6,"total_value":-0.22,"avg_gp":7,"picks":[{"round":1,"name":"David Orr","team_code":"Red Storm","archetype":"Scorer / Rebounder"},{"round":2,"name":"Paul Votto","team_code":"Black Mamba","archetype":"Playmaker / Defender"},{"round":3,"name":"Jon Fiorillo","team_code":"Huskies","archetype":"Playmaker"},{"round":4,"name":"Jeffrey Luman","team_code":"Green Wave","archetype":"Defender / Winner"},{"round":5,"name":"Joe Flaherty","team_code":"Bulldogs","archetype":"Depth"},{"round":6,"name":"Alex Hetherington","team_code":"Knicks","archetype":"Efficient"},{"round":7,"name":"Mike Rothstein","team_code":"Huskies","archetype":"Depth"},{"round":8,"name":"Justin Rozen","team_code":"Black Mamba","archetype":"Depth"}]}],"standings":[{"rank":1,"team":"Green Wave","team_id":890772,"gp":9,"w":7,"l":2,"pct":"0.778","pf":435,"pa":367,"diff":68,"streak":"w3","last_ten":"7-2-0"},{"rank":2,"team":"Huskies","team_id":852782,"gp":9,"w":6,"l":3,"pct":"0.667","pf":427,"pa":392,"diff":35,"streak":"w1","last_ten":"6-3-0"},{"rank":3,"team":"Red Storm","team_id":852780,"gp":9,"w":5,"l":4,"pct":"0.556","pf":415,"pa":405,"diff":10,"streak":"w1","last_ten":"5-4-0"},{"rank":4,"team":"Knicks","team_id":852783,"gp":9,"w":5,"l":4,"pct":"0.556","pf":335,"pa":344,"diff":-9,"streak":"l1","last_ten":"5-4-0"},{"rank":5,"team":"Black Mamba","team_id":852784,"gp":9,"w":3,"l":6,"pct":"0.333","pf":398,"pa":430,"diff":-32,"streak":"l1","last_ten":"3-6-0"},{"rank":6,"team":"Bulldogs","team_id":852781,"gp":9,"w":1,"l":8,"pct":"0.111","pf":403,"pa":475,"diff":-72,"streak":"l8","last_ten":"1-8-0"}]};
+
+const TIER_COLORS = ["var(--accent)","var(--accent-2)","var(--full)","var(--part)","var(--ink-3)","var(--rule)"];
+const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const f1 = n => n.toFixed(1);
+const sgn = n => (n>=0?"+":"") + n.toFixed(2);
+
+/* ---- big board with tier bands + sorting ---- */
+const tb = document.getElementById("board");
+const tierCount = {};
+DATA.players.forEach(p => { tierCount[p.ti] = (tierCount[p.ti]||0)+1; });
+
+// Default sort direction per column: name/team alphabetical, rank ascending,
+// TO% ascending (lower is better), everything else descending (higher is better).
+const DEFAULT_DIR = { r: "asc", n: "asc", t: "asc", top: "asc" };
+const sortState = { key: "r", dir: "asc" };
+
+function sortedPlayers() {
+  const { key, dir } = sortState;
+  const arr = DATA.players.slice();
+  arr.sort((a, b) => {
+    let av = a[key], bv = b[key];
+    if (typeof av === "string") { av = av.toLowerCase(); bv = bv.toLowerCase(); }
+    if (av < bv) return dir === "asc" ? -1 : 1;
+    if (av > bv) return dir === "asc" ? 1 : -1;
+    return a.r - b.r; // stable tiebreak
+  });
+  return arr;
+}
+
+function renderBoard() {
+  tb.innerHTML = "";
+  // Tier bands only make sense in the board's natural (rank-ascending) order —
+  // any other sort interleaves tiers, so drop the bands rather than mislabel rows.
+  const useBands = sortState.key === "r" && sortState.dir === "asc";
+  let lastTier = -1;
+  sortedPlayers().forEach(p => {
+    if (useBands && p.ti !== lastTier) {
+      lastTier = p.ti;
+      const tr = document.createElement("tr");
+      tr.className = "band";
+      tr.innerHTML = '<td colspan="15"><div class="bandin">'
+        + '<span class="bandkey" style="background:'+TIER_COLORS[p.ti]+'"></span>'
+        + '<span class="bandname">'+esc(DATA.tier_names[p.ti])+'</span>'
+        + '<span class="bandmeta">'+tierCount[p.ti]+' player'+(tierCount[p.ti]===1?'':'s')+'</span>'
+        + '</div></td>';
+      tb.appendChild(tr);
+    }
+    const pct = Math.round(p.at*100);
+    const cls = pct >= 83 ? "a-full" : pct >= 50 ? "a-part" : "a-thin";
+    const tr = document.createElement("tr");
+    tr.innerHTML =
+        '<td class="l rk num">'+p.r+'</td>'
+      + '<td class="l"><span class="pname">'+esc(p.n)+'</span><span class="parch">'+esc(p.a)+'</span></td>'
+      + '<td class="l"><span class="tm">'+esc(p.t)+'</span></td>'
+      + '<td class="num gp">'+p.g+'</td>'
+      + '<td class="num">'+f1(p.p)+'</td><td class="num">'+f1(p.rb)+'</td><td class="num">'+f1(p.as)+'</td>'
+      + '<td class="num">'+f1(p.s)+'</td><td class="num">'+f1(p.b)+'</td><td class="num">'+f1(p.dfl)+'</td>'
+      + '<td class="num">'+sgn(p.ppp)+'</td><td class="num">'+f1(p.ts)+'</td><td class="num">'+f1(p.top)+'</td>'
+      + '<td><span class="att '+cls+'"><span class="attbar"><i style="width:'+pct+'%"></i></span>'
+        + '<span class="attn num">'+pct+'%</span></span></td>'
+      + '<td class="num val'+(p.v>0?' pos':'')+'">'+sgn(p.v)+'</td>';
+    tb.appendChild(tr);
+  });
+}
+
+function updateSortIndicators() {
+  document.querySelectorAll("thead th[data-key]").forEach(th => {
+    th.classList.remove("sorted");
+    const old = th.querySelector(".sortarrow");
+    if (old) old.remove();
+    if (th.dataset.key === sortState.key) {
+      th.classList.add("sorted");
+      const arrow = document.createElement("span");
+      arrow.className = "sortarrow";
+      arrow.textContent = sortState.dir === "asc" ? "▲" : "▼";
+      th.appendChild(arrow);
+    }
+  });
+}
+
+document.querySelectorAll("thead th[data-key]").forEach(th => {
+  th.addEventListener("click", () => {
+    const key = th.dataset.key;
+    if (sortState.key === key) {
+      sortState.dir = sortState.dir === "asc" ? "desc" : "asc";
+    } else {
+      sortState.key = key;
+      sortState.dir = DEFAULT_DIR[key] || "desc";
+    }
+    updateSortIndicators();
+    renderBoard();
+  });
+});
+
+updateSortIndicators();
+renderBoard();
+
+/* ---- value curve ---- */
+(function(){
+  const W=760,H=132,PAD=4;
+  const vals=DATA.players.map(p=>p.v);
+  const max=Math.max(...vals), min=Math.min(...vals);
+  const n=vals.length, bw=(W-PAD*2)/n;
+  const y=v=>{ const t=(v-min)/(max-min||1); return H-6-t*(H-20); };
+  const zero=y(0);
+  let bars="";
+  DATA.players.forEach((p,i)=>{
+    const x=PAD+i*bw, top=Math.min(y(p.v),zero), h=Math.max(Math.abs(y(p.v)-zero),1.2);
+    bars+='<rect x="'+x.toFixed(2)+'" y="'+top.toFixed(2)+'" width="'+(bw-1.1).toFixed(2)
+        + '" height="'+h.toFixed(2)+'" rx="1" fill="'+TIER_COLORS[p.ti]+'"><title>'
+        + esc(p.n)+' — '+sgn(p.v)+'</title></rect>';
+  });
+  document.getElementById("curve").innerHTML =
+    '<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" role="img" '
+    + 'aria-label="Composite value for all 48 players, descending, colored by tier">'
+    + '<line x1="0" x2="'+W+'" y1="'+zero.toFixed(2)+'" y2="'+zero.toFixed(2)
+    + '" stroke="var(--rule)" stroke-width="1"/>' + bars + '</svg>';
+  document.getElementById("curvekey").innerHTML =
+    DATA.tier_names.map((t,i)=> tierCount[i]
+      ? '<span><i style="background:'+TIER_COLORS[i]+'"></i>'+esc(t)+'</span>' : ''
+    ).join("");
+})();
+
+/* ---- weights ---- */
+(function(){
+  const LBL={foul_rate:"Foul rate",pts:"Points",reb:"Rebounds",ast:"Assists",stl:"Steals",blk:"Blocks",deflect:"Deflections",netppp:"Net PPP",ts:"True sh.",to_pct:"Turnover %"};
+  const w=DATA.model.weights, maxw=Math.max(...Object.values(w).map(Math.abs));
+  document.getElementById("weights").innerHTML = Object.keys(w).map(k=>{
+    const v=w[k], pct=Math.abs(v)/maxw*100;
+    return '<div class="wrow"><span class="wlab">'+LBL[k]+'</span>'
+      + '<span class="wbar"><i class="'+(v<0?'neg':'')+'" style="width:'+pct+'%;'
+      + (v<0?'right:0':'left:0')+'"></i></span>'
+      + '<span class="wnum num">'+(v>0?'+':'')+v.toFixed(1)+'</span></div>';
+  }).join("");
+})();
+
+/* ---- snake draft grid ---- */
+(function(){
+  const R=DATA.rosters, rounds=Math.max(...R.map(r=>r.picks.length));
+  document.getElementById("dhead").innerHTML =
+    '<th style="width:40px">Rd</th>' + R.map(r=>'<th>Team '+r.slot+'</th>').join("");
+  let rows="";
+  for(let i=1;i<=rounds;i++){
+    rows += '<tr><td class="rd num">'+i+'</td>' + R.map(r=>{
+      const pk=r.picks.find(p=>p.round===i);
+      return '<td>' + (pk
+        ? '<span class="pk">'+esc(pk.name)+'<span class="pt"> · '+esc(pk.team_code)+'</span></span>'
+        : '<span class="pt">—</span>') + '</td>';
+    }).join("") + '</tr>';
+  }
+  document.getElementById("dbody").innerHTML = rows;
+
+  const byName={}; DATA.players.forEach(p=>byName[p.n]=p);
+  document.getElementById("rosters").innerHTML = R.map(r=>
+    '<div class="ros"><h4>Team '+r.slot+'</h4>'
+    + '<p class="rosmeta num">Total value '+sgn(r.total_value)+' · Avg GP '+r.avg_gp.toFixed(1)+'</p>'
+    + '<ol>' + r.picks.map(pk=>{
+        const p=byName[pk.name]||{};
+        return '<li><span class="rn">'+esc(pk.name)+'</span>'
+          + '<span class="rg num">'+(p.g!=null?p.g+' GP':'')+'</span></li>';
+      }).join("") + '</ol></div>'
+  ).join("");
+})();
+</script>
