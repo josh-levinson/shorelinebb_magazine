@@ -14,7 +14,9 @@
     "draft": "node src/draft.js",
     "draft:page": "node src/draft-page.js",
     "backfill": "node src/backfill-recaps.js",
-    "weekly": "node src/collect.js && node src/summarize.js && node src/article.js && node src/site.js"
+    "weekly": "node src/collect.js && node src/collect-hoopsalytics-boxscores.js && node src/summarize.js && node src/article.js && node src/site.js",
+    "weekly:auto": "bash scripts/weekly-run.sh",
+    "week:status": "node src/week-status.js"
   },
   "devDependencies": {
     "playwright": "^1.61.1"

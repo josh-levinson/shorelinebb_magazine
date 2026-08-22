@@ -1,0 +1,11 @@
+[Unit]
+Description=Shoreline basketball — build & publish the weekly issue if it's ready
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/josh/code/shorelinebb_magazine
+Environment=PATH=/usr/local/bin:/usr/bin:/bin
+ExecStart=/home/josh/code/shorelinebb_magazine/scripts/weekly-run.sh
+TimeoutStartSec=1800

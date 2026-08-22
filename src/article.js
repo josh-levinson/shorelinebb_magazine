@@ -16,7 +16,7 @@ try {
   process.loadEnvFile();
 } catch { /* no .env file — rely on the ambient environment */ }
 import {
-  listSnapshots, loadSnapshot, weeklyProduction, newlyFinalGames, teamNameById,
+  listSnapshots, loadSnapshot, requireWeeklyProduction, newlyFinalGames, teamNameById,
   buildArticleData, generateArticle,
 } from "./lib.js";
 
@@ -37,9 +37,19 @@ const baseline = !prev;
 
 const names = teamNameById(curr);
 const teamOf = (id) => names.get(id) || "Unknown";
-const production = weeklyProduction(curr, prev);
 const games = newlyFinalGames(curr, prev);
 const prevRank = new Map((prev?.standings ?? []).map((t) => [t.team_id, t.rank]));
+
+// Stat lines come from Hoopsalytics per-game box scores only — never a
+// TeamLinkt cumulative diff, which would put invented-looking numbers about
+// real, named players into a published article.
+let production;
+try {
+  production = requireWeeklyProduction(target, games);
+} catch (e) {
+  console.error(e.message);
+  process.exit(1);
+}
 
 const data = buildArticleData({
   league: "Shoreline adult men's basketball league",
@@ -51,9 +61,9 @@ const data = buildArticleData({
   prevRank,
   production,
   teamOf,
-  note: baseline
-    ? "This is the first week of the season; all stats are season-to-date with no prior week to compare against."
-    : "Player stats below are this week's production only (computed by diffing cumulative season totals against last week).",
+  note: "Player stats below are real per-game box score lines from Hoopsalytics, "
+    + "the league's stats provider, summed over exactly this week's games."
+    + (baseline ? " This is the first week of the season, so there is no prior week to compare against." : ""),
 });
 
 // ---- generate --------------------------------------------------------------

@@ -1,0 +1,15 @@
+[Unit]
+Description=Twice-daily check for a publishable Shoreline issue
+
+[Timer]
+# Deliberately daily, not Wednesday-anchored: games are Wednesday but stats land
+# anywhere from Wednesday night to Friday night, playoffs move to Tue/Thu, and
+# this box runs on UTC while the league doesn't. The runner no-ops when there's
+# nothing to publish, so the schedule doesn't have to be clever.
+OnCalendar=*-*-* 09,21:00:00
+RandomizedDelaySec=1800
+# Catch up on a run missed while the machine was off.
+Persistent=true
+
+[Install]
+WantedBy=timers.target

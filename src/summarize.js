@@ -1,12 +1,14 @@
 // Summarizer: reads the two most recent snapshots and writes a weekly
 // markdown summary — game recaps, standings (with movement), and
-// movers-and-shakers (weekly production diff).
+// movers-and-shakers.
+//
+// Player stats come from Hoopsalytics per-game box scores, never TeamLinkt.
 //
 // Usage:  node src/summarize.js            # latest two snapshots
 //         node src/summarize.js 2026-06-29 # treat this stamp as "latest"
 import { mkdirSync, writeFileSync } from "node:fs";
 import {
-  listSnapshots, loadSnapshot, weeklyProduction, weeklyProductionFromBoxscores,
+  listSnapshots, loadSnapshot, requireWeeklyProduction, boxscoreSourceNote,
   newlyFinalGames, teamNameById, renderSummaryMarkdown,
 } from "./lib.js";
 
@@ -30,17 +32,16 @@ const teamOf = (id) => names.get(id) || "Unknown";
 const games = newlyFinalGames(curr, prev);
 const prevRank = new Map((prev?.standings ?? []).map((t) => [t.team_id, t.rank]));
 
-// Prefer Hoopsalytics' real per-game box scores; fall back to the cumulative
-// TeamLinkt diff only when this week's box scores aren't published yet. The
-// diff is the lossy path — see weeklyProductionFromBoxscores() for why.
-const teamCodeByName = new Map(curr.players.map((p) => [p.Name, p.Team]));
-const boxProduction = weeklyProductionFromBoxscores(target, games, { teamCodeByName });
-const production = boxProduction ?? weeklyProduction(curr, prev);
-const source = boxProduction
-  ? `Player stats from Hoopsalytics per-game box scores for event(s) `
-    + `${games.map((g) => g.event_id).join(", ")}.`
-  : `Generated from ${target}` + (prev ? ` vs ${prev.stamp}` : ` (baseline)`)
-    + ` (cumulative-stats diff — no Hoopsalytics box scores available).`;
+// Hoopsalytics' real per-game box scores are the only stat source; this throws
+// rather than falling back to TeamLinkt if they aren't scored yet.
+let production;
+try {
+  production = requireWeeklyProduction(target, games);
+} catch (e) {
+  console.error(e.message);
+  process.exit(1);
+}
+const source = boxscoreSourceNote(games);
 
 const md = renderSummaryMarkdown({
   target,

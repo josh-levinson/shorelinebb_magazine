@@ -35,7 +35,7 @@ const log = (...a) => console.log(...a);
 // The site renders player names with U+00A0 (non-breaking space) between
 // first/last name (to stop them wrapping mid-name), so normalize that to a
 // plain space or every downstream name-keyed lookup (loadSnapshot, the draft
-// board, weeklyProduction's Map) silently fails to match.
+// board, weeklyProductionFromBoxscores' Map) silently fails to match.
 const normalizeSpace = (s) => String(s ?? "").replace(/ /g, " ").replace(/\s+/g, " ").trim();
 function parsePlayerCell(cell) {
   const clean = normalizeSpace(cell);

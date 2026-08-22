@@ -17,33 +17,42 @@ Endpoints in play (association `10372`, current season `54723`):
 |------|--------|-------|
 | Standings | `GET /leagues/getStandings/10372/54723` | JSON: W/L, pts for/against, streak, rank, last-10 |
 | Games + scores | `GET /leagues/getAllEvents/10372` | Final score appended to team cell as `(57)` once entered |
-| Player stats (full) | `#stats_table` on the Players tab of `/Statistics` | 24 players × ~22 columns (pts, reb, ast, stl, blk, shooting). **Cumulative.** |
+| Player stats (full) | `#stats_table` on the Players tab of `/Statistics` | **Archived only, never published** — see the sourcing rule below |
 | Stat leaders | `GET /leagues/getLeadPlayerStatisticCardsJSON/54723` | Top-5 per stat (supplementary) |
-| Per-game box score | `getPlayerStatsForEvent/10372` | Currently empty — see below |
+| Per-game box score | `getPlayerStatsForEvent/10372` | Not used — lags Hoopsalytics badly |
 
-### The cumulative-stats problem (and the fix)
-The stats table only shows **season totals**, so the original approach was to
-snapshot it every run and diff the two most recent snapshots:
-`thisWeek = thisSnapshot − lastSnapshot`, per player, per stat.
+## The sourcing rule
 
-**That diff is no longer the primary source — Hoopsalytics box scores are.**
-TeamLinkt's cumulative table lags unpredictably: it sat on identical totals
-across the 2026-08-09 and 2026-08-19 snapshots, then caught up three games at
-once by 2026-08-21. Diffing across that produces a "week" containing however
-many games the table happened to catch up on — which is how a 55-45 game once
-reported an 81-point line. So `summarize.js` now prefers
-`weeklyProductionFromBoxscores()`, summing the real per-game Hoopsalytics box
-scores (see below) for exactly the games that went final this week, and falls
-back to the cumulative diff only when those box scores aren't published yet.
+**Player statistics for the articles and the draft board come from Hoopsalytics
+and never from TeamLinkt.** TeamLinkt is used only for league-administrative
+data: the schedule, final scores, and standings.
+
+The reason is that TeamLinkt republishes Hoopsalytics' numbers into a cumulative
+season-totals table that lags unpredictably. It sat on identical totals across
+the 2026-08-09 and 2026-08-19 snapshots, then caught up three games at once by
+2026-08-21. Deriving a week by diffing consecutive snapshots of that table
+(`thisWeek = thisSnapshot − lastSnapshot`) therefore yields a "week" containing
+however many games the table happened to catch up on — which is how a 55-45 game
+once reported an 81-point line. These are real, named people, and that number
+went into a published column about them.
+
+So there is **no TeamLinkt stat path left in the code to fall back to**.
+`src/lib.js` exposes exactly one weekly-production function,
+`weeklyProductionFromBoxscores()`, which sums real Hoopsalytics per-game box
+scores for exactly the games that went final this week; `requireWeeklyProduction()`
+wraps it and **throws** when this week's box scores aren't scored yet.
+`summarize.js` and `article.js` exit with an actionable message in that case, and
+`loadSnapshot()` deliberately does not expose TeamLinkt's `player_stats.json` at
+all (`collect.js` still archives the file, but nothing reads it). Publishing a
+day late beats publishing wrong numbers about real players.
 
 ### Stats availability / timing
 Stats are produced by Hoopsalytics **over the weekend after game film is
-analyzed**. As of the first snapshot (2026-06-25), only week 1 (June 17) is in
-the totals (`GP=1`); the June 24 games and per-event box scores are still
-pending. Per-event box scores (`getPlayerStatsForEvent`) return empty even for
-analyzed games, so the **full cumulative table is the source of truth** — the
-weekly diff gives us per-week lines without needing per-event box scores.
-**Run the collector on Sunday/Monday**, after the weekend analysis lands.
+analyzed**, so a game stays "pending" on hoopsalytics.com until then and its box
+score simply doesn't exist yet. **Run the pipeline Sunday/Monday**, after the
+weekend analysis lands. If you run it too early, `npm run weekly` stops at the
+summary step and tells you which events are missing — that's working as intended,
+not a bug to route around.
 
 ## Hoopsalytics — advanced stats (draft board source)
 
@@ -76,21 +85,25 @@ Set `HOOPSALYTICS_EMAIL` in `.env` (see `.env.example`) before running it.
 ## Layout
 
 ```
-src/collect.js             # Playwright collector (TeamLinkt) → writes a weekly snapshot
+src/collect.js             # Playwright collector (TeamLinkt) → schedule, scores, standings
 src/collect-hoopsalytics.js # Playwright collector (Hoopsalytics) → advanced stats, draft board source
 src/collect-hoopsalytics-boxscores.js # Playwright collector (Hoopsalytics) → per-game box scores, weekly stat source
 src/draft.js                # draft board generator (valuation model + snake draft sim)
 src/draft-page.js           # renders <date>-draft.json into the published <date>-draft-board.html
 src/site.js                 # static-site builder → renders summaries/ into dist/ (the magazine)
 src/magazine.css            # magazine stylesheet (copied to dist/style.css on build)
+src/week-status.js          # "is there a week to publish, and are its stats in?" probe
 src/probe*.js                # one-off discovery scripts (kept for debugging)
+scripts/weekly-run.sh       # unattended runner — see "Running it on a schedule"
+scripts/systemd/            # user timer units for that runner
 data/snapshots/<date>/
   standings.json           # parsed standings
   games.json               # parsed games + scores + event ids
-  player_stats.json        # full per-player cumulative stat lines (TeamLinkt) ← diff source
+  player_stats.json        # TeamLinkt cumulative stats — ARCHIVE ONLY, never read
   hoopsalytics_stats.json  # full per-player advanced stat lines (Hoopsalytics) ← draft board source
+  hoopsalytics_boxscores/<event_id>.json  # per-game lines (Hoopsalytics) ← the ONLY weekly stat source
   leaders.json             # top-5 leader cards
-  boxscores/<id>.json      # per-event box score (empty until published)
+  boxscores/<id>.json      # TeamLinkt per-event box score — archive only, never read
   raw/                     # untouched JSON, for re-parsing if a layout changes
   manifest.json            # counts + season url
 ```
@@ -102,7 +115,7 @@ npm install                        # first time
 npx playwright install chromium    # first time
 cp .env.example .env               # then fill in .env (API key for the article step, login email for Hoopsalytics)
 
-npm run weekly                     # collect snapshot → deterministic summary → AI article
+npm run weekly                     # collect (TeamLinkt + Hoopsalytics box scores) → summary → article → site
 # or step by step:
 npm run collect                    # writes data/snapshots/<today>/
 npm run summary                    # writes summaries/<today>.md (deterministic; no API key needed)
@@ -128,12 +141,15 @@ npm run draft && npm run draft:page    # refresh the draft board
 npm run site                           # rebuild dist/
 ```
 
-Note that `npm run weekly` still runs only the TeamLinkt collect → summary →
-article → site chain; run the two Hoopsalytics collectors before it if you want
-the summary sourced from real per-game box scores rather than the fallback diff.
+`npm run weekly` covers all of that except the draft board: it runs
+`collect` → `collect:hoopsalytics-boxscores` → `summary` → `article` → `site`,
+so a normal run produces the snapshot, both markdown outputs, **and** the
+rebuilt `dist/`. The box-score collector is in the chain because the summary and
+article now require it — there is no TeamLinkt fallback, so `weekly` stops with
+an actionable error if Hoopsalytics hasn't scored this week's games yet.
 
-`npm run weekly` now ends by building the site, so a normal run produces the
-snapshot, both markdown outputs, **and** the rebuilt `dist/`.
+`npm run collect:hoopsalytics` (season-long advanced stats) stays out of the
+chain; it's only needed for the draft board, which is still a manual step.
 
 **Run it Sunday or Monday**, after the weekend stats analysis lands. Each run
 produces two outputs from the same snapshot data:
@@ -151,22 +167,108 @@ produces two outputs from the same snapshot data:
 Leading scorers and weekly lines come from the Hoopsalytics per-game box scores
 for the games that went final that week — real per-game data, so a lagging
 cumulative table can't smear several games into one "week". If those box scores
-aren't available, the summary falls back to the snapshot diff (a player's
-week-over-week stat delta), and says so in its footer credit.
+aren't available, both steps stop and tell you which events are missing; they do
+not fall back to TeamLinkt. See [the sourcing rule](#the-sourcing-rule).
 
 ## Status
 
-- [x] **Collector** (`src/collect.js`) — standings, games/scores, full player stats, leaders. Validated live.
+- [x] **Collector** (`src/collect.js`) — standings, games/scores, leaders. Validated live.
 - [x] **Hoopsalytics collector** (`src/collect-hoopsalytics.js`) — advanced per-player stats across 7 views. Validated live.
-- [x] **Analyzer** (`src/lib.js`) — snapshot diff → weekly production; standings movement; double-doubles.
+- [x] **Box-score collector** (`src/collect-hoopsalytics-boxscores.js`) — per-game lines; the only weekly stat source.
+- [x] **Analyzer** (`src/lib.js`) — box scores → weekly production; standings movement; double-doubles.
 - [x] **Summarizer** (`src/summarize.js`) — renders the deterministic `summaries/<date>.md`.
 - [x] **Article writer** (`src/article.js`) — Claude-written ESPN-style `summaries/<date>-article.md`.
 - [x] **Draft board** (`src/draft.js`) — valuation model + snake draft sim, sourced from Hoopsalytics. Manual step, not part of `npm run weekly`.
 - [x] **Draft board page** (`src/draft-page.js`) — renders the board JSON into the published HTML page.
+- [x] **Scheduled runner** (`scripts/weekly-run.sh` + `src/week-status.js`) — twice-daily timer that publishes the week as soon as Hoopsalytics has scored it.
 
 ### Possible next steps
 - Auto-email the article each week (your Gmail is connected to Claude Code).
+- Move the scheduled runner into GitHub Actions so it doesn't need this machine
+  powered on (needs `HOOPSALYTICS_EMAIL` + `ANTHROPIC_API_KEY` as repo secrets
+  and `contents: write` to commit the issue back).
 - Tune the article's voice/length in `src/article.js` (system prompt + `effort`).
+
+## Running it on a schedule
+
+`scripts/weekly-run.sh` is `npm run weekly` plus the judgement calls a human
+makes: is there a new week to write about, and have the stats landed yet? It's
+driven by a systemd user timer that fires **twice a day, every day**.
+
+Daily-and-idempotent rather than "Wednesday at 9pm" is deliberate. Games are
+Wednesday, but Hoopsalytics scores the film anywhere from Wednesday night to
+Friday night; playoff games move to Tuesday and Thursday; and the box's clock is
+UTC while the league's isn't. A schedule that tries to predict all that will be
+wrong. Instead each run asks the repo what to do:
+
+| Situation | What the run does |
+|---|---|
+| No games finalized since the last issue | quiet no-op |
+| New games, box scores not all scored yet | quiet no-op, try again in 12h |
+| New games, every box score present | build → commit → push → Pages deploys |
+| Every new game was a forfeit | logs **NEEDS ATTENTION** (see below) |
+
+So a normal week publishes itself the first time it can, whether that's Thursday
+morning or Sunday night, and the playoff schedule change needs no edit.
+
+### The one non-obvious part
+
+A run that *doesn't* publish deletes the snapshot it just collected. This is
+load-bearing, not tidiness. `summarize.js` derives "this week" by diffing
+today's snapshot against **the previous snapshot directory**
+(`newlyFinalGames()`). Left behind, a Thursday snapshot taken while stats were
+still pending would become Friday's baseline — and Friday's diff would then find
+zero new games and cheerfully publish an **empty issue** for a week that had
+three. Discarding keeps the invariant the diff relies on: *the newest snapshot is
+the last published issue.* A snapshot that was already on disk before the run
+isn't touched.
+
+`src/week-status.js` is the readiness check, and it's stricter than
+`requireWeeklyProduction()`, which publishes as soon as *one* box score exists.
+That's fine for a one-game week and wrong for a playoff week with two game days
+— it would publish an issue covering both games carrying only the first game's
+stat lines. The runner waits for all of them. Forfeits are excluded from the
+wait, since a 2-0 forfeit never gets a box score.
+
+Run it by hand any time to see where a week stands:
+
+```bash
+npm run week:status          # new_games / missing / ready=yes|no
+```
+
+### Install
+
+```bash
+npx playwright install --with-deps chromium        # needs sudo; one time
+cp scripts/systemd/shorelinebb-weekly.{service,timer} ~/.config/systemd/user/
+systemctl --user daemon-reload
+systemctl --user enable --now shorelinebb-weekly.timer
+```
+
+`Persistent=true` means a run missed while the machine was off happens on the
+next boot, and `loginctl enable-linger` (already on) keeps the timer running
+without a login session.
+
+```bash
+systemctl --user list-timers shorelinebb-weekly    # when it next fires
+journalctl --user -u shorelinebb-weekly -n 50      # what the last runs did
+tail -f ~/.local/state/shorelinebb/weekly.log      # same, kept longer
+PUBLISH=0 npm run weekly:auto                      # build but don't commit/push
+systemctl --user start shorelinebb-weekly.service  # force a run now
+```
+
+### When it wants a human
+
+Two cases don't self-resolve, both loud in the log:
+
+- **All-forfeit week** — no box score will ever exist, so the stats gate never
+  opens. Write that week by hand or skip it.
+- **A step failed after the stats were verified good** (article/site/git). The
+  snapshot is deliberately *kept* so you can inspect it, and the service exits
+  non-zero, so `systemctl --user status` shows it red.
+
+The draft board stays manual — `npm run draft && npm run draft:page` — same as
+before.
 
 ## Publishing (the magazine)
 

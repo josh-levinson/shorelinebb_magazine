@@ -167,7 +167,7 @@ ${content}
 </main>
 <footer class="site-footer">
   <div>${esc(SITE_TITLE)}</div>
-  <div class="muted">Recaps written from real box-score data. Stats via TeamLinkt / Hoopsalytics.</div>
+  <div class="muted">Recaps written from real box-score data. Stats via Hoopsalytics.</div>
 </footer>
 </body>
 </html>

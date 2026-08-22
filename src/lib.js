@@ -1,6 +1,16 @@
-// Shared helpers: load snapshots, diff cumulative player stats into weekly
-// production. The whole movers-and-shakers idea rests on diffing two snapshots,
-// since the league only exposes season totals.
+// Shared helpers: load snapshots and build weekly player production from
+// Hoopsalytics per-game box scores.
+//
+// SOURCING RULE: player statistics for the issue (summary + article) and for
+// the draft board come from Hoopsalytics — the league's actual stats provider —
+// and never from TeamLinkt. TeamLinkt republishes Hoopsalytics' numbers into a
+// cumulative table that lags unpredictably (it sat on identical totals across
+// the 2026-08-09 and 2026-08-19 snapshots, then caught up three games at once
+// by 2026-08-21), so diffing it smears several games into one "week" — that's
+// how a 55-45 game once produced an 81-point line. There is deliberately no
+// TeamLinkt stat path left in this file to fall back to. TeamLinkt remains the
+// source only for league-administrative data: the schedule, final scores, and
+// standings.
 import { readdirSync, readFileSync, existsSync } from "node:fs";
 import Anthropic from "@anthropic-ai/sdk";
 
@@ -46,9 +56,11 @@ export function loadSnapshot(stamp) {
   const dir = `${SNAP_ROOT}/${stamp}`;
   return {
     stamp,
+    // TeamLinkt: league-administrative data only (schedule, scores, standings).
+    // Its cumulative player_stats.json is still archived by collect.js, but is
+    // deliberately NOT exposed here — see the sourcing rule at the top.
     standings: readJSON(`${dir}/standings.json`, []),
     games: readJSON(`${dir}/games.json`, []),
-    players: readJSON(`${dir}/player_stats.json`, []),
     leaders: readJSON(`${dir}/leaders.json`, []),
     manifest: readJSON(`${dir}/manifest.json`, {}),
     // Advanced per-player stats from Hoopsalytics (src/collect-hoopsalytics.js) —
@@ -58,45 +70,15 @@ export function loadSnapshot(stamp) {
   };
 }
 
-// Per-player weekly production. If there's no previous snapshot, the current
-// cumulative totals *are* the week (baseline week 1). Returns a map keyed by
-// player name → { name, team_id, weekly:{stat:delta}, cumulative:{stat:val}, gp_week }.
-export function weeklyProduction(curr, prev) {
-  const prevByName = new Map((prev?.players ?? []).map((p) => [p.Name, p]));
-  return curr.players.map((p) => {
-    const before = prevByName.get(p.Name);
-    const weekly = {};
-    for (const s of COUNT_STATS) {
-      weekly[s] = num(p[s]) - (before ? num(before[s]) : 0);
-    }
-    const cumulative = {};
-    for (const s of COUNT_STATS) cumulative[s] = num(p[s]);
-    return {
-      name: p.Name,
-      team_id: p.team_id,
-      team_code: p.Team,
-      weekly,
-      cumulative,
-      gp_week: weekly.GP,
-      played_this_week: weekly.GP > 0 || Object.values(weekly).some((v) => v > 0),
-    };
-  });
-}
-
-// Per-player weekly production summed from Hoopsalytics per-game box scores —
-// the preferred source, and the reason collect-hoopsalytics-boxscores.js exists.
+// Per-player weekly production, summed from Hoopsalytics per-game box scores
+// for exactly the games that went final this week. This is the ONLY stat source
+// for the issue — see the sourcing rule at the top of this file.
 //
-// TeamLinkt's cumulative stats table lags badly and unpredictably: it sat on
-// identical totals across the 2026-08-09 and 2026-08-19 snapshots, then caught
-// up three games at once by 2026-08-21. A snapshot-to-snapshot diff of that
-// table therefore reports however many games the table happened to catch up on
-// as "this week" — which is how a 55-45 game produced an 81-point line.
-// Hoopsalytics is the league's actual stats provider and publishes real
-// per-game lines, so sum exactly this week's games instead of trusting a diff.
-//
-// Returns the same shape as weeklyProduction(). Returns null when not a single
-// one of `games` has a box score on disk, so callers can fall back to the diff.
-export function weeklyProductionFromBoxscores(stamp, games, { teamCodeByName } = {}) {
+// Returns per-player rows { name, team_id, weekly:{stat:value}, gp_week,
+// played_this_week }. Returns null when not one of `games` has a box score on
+// disk yet, which callers must treat as "not ready" rather than falling back to
+// TeamLinkt — use requireWeeklyProduction() to get that behavior.
+export function weeklyProductionFromBoxscores(stamp, games) {
   const dir = `${SNAP_ROOT}/${stamp}/hoopsalytics_boxscores`;
   const byName = new Map();
   let found = 0;
@@ -109,7 +91,6 @@ export function weeklyProductionFromBoxscores(stamp, games, { teamCodeByName } =
       const entry = byName.get(row.name) ?? {
         name: row.name,
         team_id: row.team_id,
-        team_code: teamCodeByName?.get(row.name) ?? null,
         weekly: Object.fromEntries(COUNT_STATS.map((s) => [s, 0])),
       };
       // A team plays once a week, but sum rather than assign so this stays
@@ -126,6 +107,32 @@ export function weeklyProductionFromBoxscores(stamp, games, { teamCodeByName } =
     played_this_week: Object.values(p.weekly).some((v) => v > 0),
   }));
 }
+
+// weeklyProductionFromBoxscores() with the "not ready" case turned into a hard
+// stop. There is no fallback by design: publishing an issue off TeamLinkt's
+// lagging cumulative diff is worse than publishing a day later, so a week whose
+// box scores haven't been scored yet fails loudly instead of quietly degrading.
+//
+// A week with no finalized games is legitimately empty, not unready.
+export function requireWeeklyProduction(stamp, games) {
+  if (games.length === 0) return [];
+  const production = weeklyProductionFromBoxscores(stamp, games);
+  if (production) return production;
+  throw new Error(
+    `No Hoopsalytics box scores in ${SNAP_ROOT}/${stamp}/hoopsalytics_boxscores/ `
+    + `for this week's ${games.length} finalized game(s): `
+    + `${games.map((g) => g.event_id).join(", ")}.\n`
+    + `  Run: node src/collect-hoopsalytics-boxscores.js ${stamp}\n`
+    + `  If that reports the games as still "pending", Hoopsalytics hasn't finished\n`
+    + `  scoring the film yet — wait and re-run. Stats are never taken from\n`
+    + `  TeamLinkt's cumulative table, which lags and smears games together.`,
+  );
+}
+
+// The credit line shown at the foot of the issue. One source, always.
+export const boxscoreSourceNote = (games) =>
+  `Player stats from Hoopsalytics per-game box scores for event(s) `
+  + `${games.map((g) => g.event_id).join(", ")}.`;
 
 // Games finalized in `curr` that were NOT finalized in `prev` (or no prev) =
 // "this week's games".

@@ -23,7 +23,7 @@ try {
   process.loadEnvFile();
 } catch { /* no .env file — rely on the ambient environment */ }
 import {
-  SNAP_ROOT, COUNT_STATS, listSnapshots, loadSnapshot, newlyFinalGames,
+  SNAP_ROOT, listSnapshots, loadSnapshot, newlyFinalGames,
   renderSummaryMarkdown, buildArticleData, generateArticle,
 } from "./lib.js";
 
@@ -36,7 +36,6 @@ if (snaps.length === 0) {
 }
 const latest = snaps[snaps.length - 1];
 const SNAP = `${SNAP_ROOT}/${latest}`;
-const BOX = `${SNAP}/boxscores`;
 const HBOX = `${SNAP}/hoopsalytics_boxscores`;
 
 const games = JSON.parse(readFileSync(`${SNAP}/games.json`, "utf8"))
@@ -54,70 +53,23 @@ for (let i = 0; i < snaps.length; i++) {
 }
 
 // ---- box score parsing ------------------------------------------------------
-// stat_types is the league's stat dictionary (id -> {name, abbreviation}) —
-// identical across events, so grab it once from the first usable file.
-let abbrevById = null;
-function loadStatTypes(payload) {
-  if (abbrevById) return;
-  abbrevById = new Map();
-  for (const teamBlock of Object.values(payload.stat_types)) {
-    for (const [id, info] of Object.entries(teamBlock)) {
-      if (id === "all" || id === "group") continue;
-      if (info?.abbreviation) abbrevById.set(id, info.abbreviation);
-    }
-    break;
-  }
-}
-
-// Parses one event's box score file into per-player weekly lines (same shape
-// weeklyProduction() produces, minus GP/MIN which per-game box scores don't carry).
-// Prefers TeamLinkt's own box score (getPlayerStatsForEvent, captured by
-// collect.js) — that's what already-generated recaps/articles for earlier
-// weeks were written from, so keep using it where it exists rather than
-// silently drifting their numbers. Falls back to hoopsalytics.com directly
-// (collect-hoopsalytics-boxscores.js) only for games TeamLinkt hasn't
-// republished yet but hoopsalytics has already fully scored.
+// Parses one event's box score into per-player weekly lines (minus GP/MIN,
+// which per-game box scores don't carry).
+//
+// Hoopsalytics only (collect-hoopsalytics-boxscores.js). TeamLinkt's
+// getPlayerStatsForEvent republishes the same numbers but lags — earlier
+// versions of this script read it first, so re-running the backfill now can
+// shift a historical week's lines onto the provider's own figures. That's the
+// intended direction: one source, and it's the one that scored the film.
 function parseBoxscore(event_id) {
-  const rows = parseTeamlinktBoxscore(event_id);
-  if (rows) return rows;
-
   const hoopPath = `${HBOX}/${event_id}.json`;
-  if (existsSync(hoopPath)) {
-    try {
-      const hoopRows = JSON.parse(readFileSync(hoopPath, "utf8"));
-      if (hoopRows.length > 0) return hoopRows;
-    } catch { /* no usable data from either source */ }
+  if (!existsSync(hoopPath)) return null;
+  try {
+    const rows = JSON.parse(readFileSync(hoopPath, "utf8"));
+    return rows.length > 0 ? rows : null;
+  } catch {
+    return null;
   }
-  return null;
-}
-
-function parseTeamlinktBoxscore(event_id) {
-  const path = `${BOX}/${event_id}.json`;
-  if (!existsSync(path)) return null;
-  let json;
-  try { json = JSON.parse(readFileSync(path, "utf8")); } catch { return null; }
-  const payload = json?.payload;
-  if (!payload?.stats || Object.keys(payload.stats).length === 0) return null;
-  loadStatTypes(payload);
-
-  const rows = [];
-  for (const [team_id, block] of Object.entries(payload.stats)) {
-    const roster = payload.rosters[team_id] || {};
-    for (const [player_id, statDict] of Object.entries(block.statistic || {})) {
-      const name = roster[player_id]?.name;
-      if (!name) continue;
-      const weekly = {};
-      for (const s of COUNT_STATS) weekly[s] = 0;
-      for (const [statId, entry] of Object.entries(statDict)) {
-        const abbrev = abbrevById.get(statId);
-        if (abbrev && COUNT_STATS.includes(abbrev)) weekly[abbrev] = Number(entry.value) || 0;
-      }
-      const played_this_week = Object.values(weekly).some((v) => v > 0);
-      weekly.GP = played_this_week ? 1 : 0;
-      rows.push({ name, team_id: Number(team_id), weekly, played_this_week });
-    }
-  }
-  return rows;
 }
 
 // ---- group games into weeks -------------------------------------------------
