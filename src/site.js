@@ -22,6 +22,11 @@ const md = new MarkdownIt({ html: true, linkify: true, typographer: true });
 const SITE_TITLE = "The Shoreline Weekly";
 const SITE_TAGLINE = "Shoreline Men's League Basketball";
 
+// GoatCounter (jlevnhv.goatcounter.com) — page-view counts for the published
+// site. Goes in the <head> of every generated page.
+const ANALYTICS = `<script data-goatcounter="https://jlevnhv.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>`;
+
 const fmtDate = (s) =>
   new Date(s + "T12:00:00").toLocaleDateString("en-US", {
     weekday: "long", month: "long", day: "numeric", year: "numeric",
@@ -122,6 +127,7 @@ function renderDraftPage(draft) {
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+${ANALYTICS}
 </head>
 <body>
 ${content}
@@ -143,6 +149,7 @@ function page({ relCss, relHome, relDraft, bodyClass, content }) {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${esc(SITE_TITLE)}</title>
+${ANALYTICS}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;0,900;1,500&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
