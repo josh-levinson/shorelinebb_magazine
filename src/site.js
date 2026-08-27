@@ -102,15 +102,35 @@ const stripMd = (s) =>
 // <title>/<style>/<script>, data embedded inline) saved as
 // summaries/<date>-draft-board.html whenever `npm run draft` output gets
 // turned into a page. Publish the newest one, if any, as dist/draft.html.
+//
+// The board is generated in two steps (`draft` writes the JSON, `draft:page`
+// renders it to HTML), so a board can lag its own data if the second step is
+// skipped. Publishing the newest board unconditionally makes that silent: the
+// page rebuilds with a fresh timestamp and stale numbers. Compare stamps and
+// refuse instead, naming the command that closes the gap.
 function loadLatestDraftBoard() {
   const files = existsSync(summariesDir) ? readdirSync(summariesDir) : [];
-  let latest = null;
-  for (const f of files) {
-    const m = f.match(/^(\d{4}-\d{2}-\d{2})-draft-board\.html$/);
-    if (m && (!latest || m[1] > latest.date)) latest = { date: m[1], file: f };
+  const newestStamp = (re) =>
+    files.reduce((best, f) => {
+      const m = f.match(re);
+      return m && (!best || m[1] > best) ? m[1] : best;
+    }, null);
+
+  const boardStamp = newestStamp(/^(\d{4}-\d{2}-\d{2})-draft-board\.html$/);
+  const jsonStamp = newestStamp(/^(\d{4}-\d{2}-\d{2})-draft\.json$/);
+
+  if (jsonStamp && (!boardStamp || jsonStamp > boardStamp)) {
+    const had = boardStamp ? `newest board is ${boardStamp}` : "no board has been generated";
+    throw new Error(
+      `Draft board is stale: summaries/${jsonStamp}-draft.json exists but ${had}.\n`
+      + `Run \`npm run draft:page\` (or \`npm run publish\` for the whole chain) before building the site.`,
+    );
   }
-  if (!latest) return null;
-  return { date: latest.date, fragment: readFileSync(join(summariesDir, latest.file), "utf8") };
+  if (!boardStamp) return null;
+  return {
+    date: boardStamp,
+    fragment: readFileSync(join(summariesDir, `${boardStamp}-draft-board.html`), "utf8"),
+  };
 }
 
 function renderDraftPage(draft) {
