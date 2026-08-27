@@ -246,22 +246,124 @@ const tierOf = (p) => {
 for (const p of raw) p.tier = tierOf(p);
 
 // ---- archetype tag ---------------------------------------------------------
-// Cheap descriptive label from the player's strongest z-scores; helps a human
-// scan the board for fit rather than raw value.
+// Every player gets a label that says something true and specific about them.
+//
+// The old version compared each player to the league in absolute terms, so a
+// player below average everywhere cleared no threshold and fell through to
+// "Depth" — which happened to 40% of the board and told a reader nothing. The
+// fix isn't kinder thresholds (that would just make the tags lie); it's asking
+// a better question in three passes:
+//
+//   1. Distinctions — league-leading or otherwise notable *facts* (top-3 in a
+//      category, real 3-point volume, never turns it over, perfect attendance).
+//      Rank-based, so they hold regardless of where a player sits on the board.
+//   2. Absolute strengths — the original z-score tags. A genuine standout gets
+//      called a Scorer, and that still outranks a merely-relative strength.
+//   3. Relative strength — for everyone else, the category where the player
+//      most exceeds *their own* average z-score across categories. Phrased in
+//      role language ("Glass Work", "Ball Mover") rather than praise language,
+//      so it stays honest about a fringe player while still being descriptive.
+//
+// Only the fallback is guaranteed to fire, so "Depth" is gone: the last resort
+// is now whatever that player does comparatively best.
+
+// Per-category rank across the pool (1 = best), on *observed* per-game rates
+// rather than the shrunk ones the valuation uses. The distinction is
+// deliberate: these tags are claims about what a player has actually done, and
+// shrink exists to hedge a projection. Ranking the shrunk rates buried the
+// league's deflection leader (1.6/gm over 5 games) behind players who'd done
+// less but done it more often — true for a draft projection, wrong for a label
+// that says "leads the league". The min-GP guards on each check below carry
+// the sample-size concern instead. Negative-weighted categories rank ascending.
+const catRank = {};
+for (const c of CATS) {
+  const order = [...raw].sort((a, b) =>
+    WEIGHTS[c] < 0 ? a[c] - b[c] : b[c] - a[c]);
+  catRank[c] = new Map(order.map((p, i) => [p.name, i + 1]));
+}
+const rankIn = (p, c) => catRank[c].get(p.name);
+
+// Threes are a totals stat, not one of the model's categories, so rank them
+// separately — per game, to stay consistent with everything else on the board.
+const threeRate = (p) => (p.gp ? p.totals.threes / p.gp : 0);
+const threeOrder = [...raw].sort((a, b) => threeRate(b) - threeRate(a));
+const threeRank = new Map(threeOrder.map((p, i) => [p.name, i + 1]));
+
+// Minimum per-game production for a category to count as a player's relative
+// strength — the median among players who register the stat at all. Keeps a
+// trace amount of a rare stat from outranking real production in a common one.
+const relFloor = {};
+for (const c of CATS) {
+  if (WEIGHTS[c] < 0) continue;
+  const doers = raw.map((p) => p[c]).filter((v) => v > 0).sort((a, b) => a - b);
+  relFloor[c] = doers.length ? doers[Math.floor(doers.length / 2)] : 0;
+}
+
+// Labels for a *relative* strength — the thing this player does best among the
+// things they do. Deliberately role-flavored rather than superlative: a fringe
+// player who rebounds more than he shoots is doing "Glass Work", not being a
+// "Rebounder", and the difference keeps the board credible.
+const RELATIVE_LABEL = {
+  pts: "Scoring Punch",
+  reb: "Glass Work",
+  ast: "Ball Mover",
+  stl: "Pickpocket",
+  blk: "Shot Blocker",
+  deflect: "Disruptor",
+  netppp: "Plus Minutes",
+  ts: "Picks His Spots",
+  to_pct: "Sure Hands",
+  foul_rate: "Clean Defender",
+};
+
 function archetype(p) {
   const tags = [];
+
+  // ---- 1. distinctions ----
+  // Facts a reader can check, ordered so the rarest lands first.
+  if (rankIn(p, "deflect") <= 3 && p.deflect >= 1) tags.push("Disruptor");
+  if (rankIn(p, "blk") <= 3 && p.blk > 0) tags.push("Rim Protector");
+  if (rankIn(p, "stl") <= 3 && p.stl >= 1) tags.push("Pickpocket");
+  if (threeRank.get(p.name) <= 5 && threeRate(p) >= 1) tags.push("Floor Spacer");
+  // Ball security: needs enough usage that "never turns it over" means
+  // something — a player who barely touches it isn't being careful.
+  if (p.gp >= 3 && p.to_pct <= 8 && p.ast >= 0.5) tags.push("Sure Hands");
+  if (p.gp >= 3 && p.z.foul_rate < -1.0) tags.push("Clean Defender");
+
+  // ---- 2. absolute strengths ----
   if (p.z.pts > 1.0) tags.push("Scorer");
   if (p.z.reb > 1.0) tags.push("Rebounder");
   if (p.z.ast > 1.0) tags.push("Playmaker");
   if (p.z.stl > 1.0 || p.z.blk > 1.0 || p.z.deflect > 1.2) tags.push("Defender");
   if (p.z.ts > 0.8 && p.z.pts > -0.3) tags.push("Efficient");
   if (p.z.netppp > 1.2) tags.push("Winner");
+  // Attendance is a real contribution in a league that forfeits short-handed,
+  // but it's the least interesting thing about a player who has other tags —
+  // so it only lands when little else has.
+  if (p.attendance >= 1 && tags.length < 2) tags.push("Iron Man");
+
+  // ---- 3. relative strength (always fires) ----
+  // Pick the category where the player sits furthest above their own mean
+  // z-score. Scoring categories only — a player whose best "skill" is a low
+  // foul rate is better described by what they do than by what they avoid,
+  // and those cases are already covered as distinctions above.
   if (!tags.length) {
-    if (p.z.pts > 0.2) tags.push("Complementary Scorer");
-    else if (p.z.reb > 0.2) tags.push("Glass Work");
-    else tags.push("Depth");
+    // A category only qualifies if the player has actually done the thing.
+    // Without a floor, blocks won every time for the low-production players:
+    // blocks are near-zero pool-wide, so 0.29/gm sits above such a player's own
+    // mean and "Shot Blocker" got handed to someone with two blocks all season.
+    // The floor is the pool median among players who record the stat at all —
+    // derived, so it tracks the league rather than hardcoding a guess.
+    const own = CATS.filter((c) => WEIGHTS[c] > 0 && p[c] >= relFloor[c]);
+    const pool = own.length ? own : ["reb"]; // reb: everyone rebounds something
+    const avg = mean(pool.map((c) => p.z[c]));
+    const best = pool.reduce((a, c) => (p.z[c] - avg > p.z[a] - avg ? c : a), pool[0]);
+    tags.push(RELATIVE_LABEL[best]);
   }
-  return tags.slice(0, 2).join(" / ");
+
+  // Dedupe — a player can reach the same word by two routes (top-3 steals and
+  // a high steal z-score both say "Pickpocket").
+  return [...new Set(tags)].slice(0, 2).join(" / ");
 }
 for (const p of raw) p.archetype = archetype(p);
 

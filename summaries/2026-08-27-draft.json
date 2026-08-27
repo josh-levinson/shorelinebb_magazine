@@ -51,7 +51,7 @@
       "team_code": "Green Wave",
       "gp": 7,
       "tier": 0,
-      "archetype": "Scorer / Rebounder",
+      "archetype": "Disruptor / Rim Protector",
       "pts": 27.14,
       "reb": 15.14,
       "ast": 3.86,
@@ -85,7 +85,7 @@
       "team_code": "Huskies",
       "gp": 9,
       "tier": 0,
-      "archetype": "Scorer / Defender",
+      "archetype": "Disruptor / Floor Spacer",
       "pts": 25.44,
       "reb": 8.78,
       "ast": 1.78,
@@ -187,7 +187,7 @@
       "team_code": "Knicks",
       "gp": 6,
       "tier": 1,
-      "archetype": "Scorer / Defender",
+      "archetype": "Disruptor / Rim Protector",
       "pts": 16.5,
       "reb": 8,
       "ast": 2.17,
@@ -221,7 +221,7 @@
       "team_code": "Green Wave",
       "gp": 5,
       "tier": 1,
-      "archetype": "Scorer / Playmaker",
+      "archetype": "Pickpocket / Floor Spacer",
       "pts": 21.4,
       "reb": 5.2,
       "ast": 3,
@@ -425,7 +425,7 @@
       "team_code": "Green Wave",
       "gp": 6,
       "tier": 2,
-      "archetype": "Complementary Scorer",
+      "archetype": "Sure Hands / Clean Defender",
       "pts": 12,
       "reb": 4.67,
       "ast": 1.17,
@@ -493,7 +493,7 @@
       "team_code": "Green Wave",
       "gp": 8,
       "tier": 3,
-      "archetype": "Winner",
+      "archetype": "Sure Hands / Clean Defender",
       "pts": 2.25,
       "reb": 4,
       "ast": 1.63,
@@ -527,7 +527,7 @@
       "team_code": "Bulldogs",
       "gp": 7,
       "tier": 3,
-      "archetype": "Scorer / Defender",
+      "archetype": "Floor Spacer / Scorer",
       "pts": 17.57,
       "reb": 5.86,
       "ast": 0.57,
@@ -595,7 +595,7 @@
       "team_code": "Red Storm",
       "gp": 8,
       "tier": 3,
-      "archetype": "Glass Work",
+      "archetype": "Ball Mover",
       "pts": 4,
       "reb": 7.25,
       "ast": 2.38,
@@ -629,7 +629,7 @@
       "team_code": "Huskies",
       "gp": 9,
       "tier": 3,
-      "archetype": "Complementary Scorer",
+      "archetype": "Sure Hands / Clean Defender",
       "pts": 9.11,
       "reb": 2.56,
       "ast": 1.22,
@@ -663,7 +663,7 @@
       "team_code": "Bulldogs",
       "gp": 10,
       "tier": 4,
-      "archetype": "Rebounder",
+      "archetype": "Rebounder / Iron Man",
       "pts": 9,
       "reb": 8.8,
       "ast": 0.6,
@@ -765,7 +765,7 @@
       "team_code": "Knicks",
       "gp": 7,
       "tier": 4,
-      "archetype": "Defender",
+      "archetype": "Rim Protector / Defender",
       "pts": 6,
       "reb": 7.14,
       "ast": 1.71,
@@ -799,7 +799,7 @@
       "team_code": "Knicks",
       "gp": 8,
       "tier": 4,
-      "archetype": "Depth",
+      "archetype": "Picks His Spots",
       "pts": 8.63,
       "reb": 4.5,
       "ast": 0.88,
@@ -833,7 +833,7 @@
       "team_code": "Bulldogs",
       "gp": 5,
       "tier": 4,
-      "archetype": "Playmaker",
+      "archetype": "Floor Spacer / Playmaker",
       "pts": 13,
       "reb": 6,
       "ast": 3,
@@ -867,7 +867,7 @@
       "team_code": "Black Mamba",
       "gp": 9,
       "tier": 4,
-      "archetype": "Depth",
+      "archetype": "Floor Spacer",
       "pts": 8.56,
       "reb": 4.11,
       "ast": 0.67,
@@ -935,7 +935,7 @@
       "team_code": "Black Mamba",
       "gp": 3,
       "tier": 4,
-      "archetype": "Glass Work",
+      "archetype": "Pickpocket",
       "pts": 6.67,
       "reb": 9,
       "ast": 1,
@@ -969,7 +969,7 @@
       "team_code": "Huskies",
       "gp": 3,
       "tier": 5,
-      "archetype": "Depth",
+      "archetype": "Sure Hands / Clean Defender",
       "pts": 7.67,
       "reb": 6,
       "ast": 3,
@@ -1003,7 +1003,7 @@
       "team_code": "Bulldogs",
       "gp": 9,
       "tier": 5,
-      "archetype": "Depth",
+      "archetype": "Clean Defender",
       "pts": 5.67,
       "reb": 4.89,
       "ast": 1.78,
@@ -1071,7 +1071,7 @@
       "team_code": "Red Storm",
       "gp": 9,
       "tier": 5,
-      "archetype": "Depth",
+      "archetype": "Clean Defender",
       "pts": 5.33,
       "reb": 2.67,
       "ast": 0.56,
@@ -1105,7 +1105,7 @@
       "team_code": "Bulldogs",
       "gp": 8,
       "tier": 5,
-      "archetype": "Depth",
+      "archetype": "Pickpocket",
       "pts": 6.13,
       "reb": 2.38,
       "ast": 2.13,
@@ -1139,7 +1139,7 @@
       "team_code": "Knicks",
       "gp": 6,
       "tier": 5,
-      "archetype": "Depth",
+      "archetype": "Picks His Spots",
       "pts": 9,
       "reb": 3.33,
       "ast": 1.17,
@@ -1207,7 +1207,7 @@
       "team_code": "Black Mamba",
       "gp": 3,
       "tier": 5,
-      "archetype": "Depth",
+      "archetype": "Plus Minutes",
       "pts": 2.67,
       "reb": 2.67,
       "ast": 0,
@@ -1241,7 +1241,7 @@
       "team_code": "Green Wave",
       "gp": 6,
       "tier": 5,
-      "archetype": "Depth",
+      "archetype": "Ball Mover",
       "pts": 6.5,
       "reb": 2.83,
       "ast": 1.83,
@@ -1275,7 +1275,7 @@
       "team_code": "Red Storm",
       "gp": 7,
       "tier": 5,
-      "archetype": "Glass Work",
+      "archetype": "Picks His Spots",
       "pts": 5.57,
       "reb": 6.86,
       "ast": 0.43,
@@ -1309,7 +1309,7 @@
       "team_code": "Red Storm",
       "gp": 7,
       "tier": 5,
-      "archetype": "Depth",
+      "archetype": "Glass Work",
       "pts": 3.43,
       "reb": 4.29,
       "ast": 0.71,
@@ -1343,7 +1343,7 @@
       "team_code": "Bulldogs",
       "gp": 9,
       "tier": 5,
-      "archetype": "Depth",
+      "archetype": "Ball Mover",
       "pts": 3.78,
       "reb": 4.22,
       "ast": 1.67,
@@ -1377,7 +1377,7 @@
       "team_code": "Green Wave",
       "gp": 5,
       "tier": 5,
-      "archetype": "Depth",
+      "archetype": "Plus Minutes",
       "pts": 0.6,
       "reb": 3.4,
       "ast": 0.6,
@@ -1411,7 +1411,7 @@
       "team_code": "Huskies",
       "gp": 8,
       "tier": 5,
-      "archetype": "Depth",
+      "archetype": "Glass Work",
       "pts": 1.38,
       "reb": 1.25,
       "ast": 0.88,
@@ -1445,7 +1445,7 @@
       "team_code": "Black Mamba",
       "gp": 6,
       "tier": 5,
-      "archetype": "Depth",
+      "archetype": "Shot Blocker",
       "pts": 3.67,
       "reb": 3.67,
       "ast": 1,
@@ -1479,7 +1479,7 @@
       "team_code": "Knicks",
       "gp": 6,
       "tier": 6,
-      "archetype": "Depth",
+      "archetype": "Shot Blocker",
       "pts": 1.33,
       "reb": 2.5,
       "ast": 1.33,
@@ -1513,7 +1513,7 @@
       "team_code": "Black Mamba",
       "gp": 9,
       "tier": 6,
-      "archetype": "Depth",
+      "archetype": "Clean Defender",
       "pts": 1.89,
       "reb": 3.89,
       "ast": 0.22,
@@ -1581,7 +1581,7 @@
       "team_code": "Red Storm",
       "gp": 8,
       "tier": 6,
-      "archetype": "Depth",
+      "archetype": "Clean Defender",
       "pts": 1,
       "reb": 1.75,
       "ast": 1.13,
@@ -1615,7 +1615,7 @@
       "team_code": "Bulldogs",
       "gp": 8,
       "tier": 6,
-      "archetype": "Depth",
+      "archetype": "Clean Defender",
       "pts": 2.25,
       "reb": 1.25,
       "ast": 0.13,
@@ -1649,7 +1649,7 @@
       "team_code": "Knicks",
       "gp": 7,
       "tier": 6,
-      "archetype": "Depth",
+      "archetype": "Glass Work",
       "pts": 0.29,
       "reb": 1,
       "ast": 0.29,
@@ -1687,13 +1687,13 @@
           "round": 1,
           "name": "Jeremy McDonald",
           "team_code": "Green Wave",
-          "archetype": "Scorer / Rebounder"
+          "archetype": "Disruptor / Rim Protector"
         },
         {
           "round": 2,
           "name": "Shawn Love",
           "team_code": "Green Wave",
-          "archetype": "Complementary Scorer"
+          "archetype": "Sure Hands / Clean Defender"
         },
         {
           "round": 3,
@@ -1705,31 +1705,31 @@
           "round": 4,
           "name": "Dan Scandalito",
           "team_code": "Bulldogs",
-          "archetype": "Playmaker"
+          "archetype": "Floor Spacer / Playmaker"
         },
         {
           "round": 5,
           "name": "Mike Iannuzzi",
           "team_code": "Black Mamba",
-          "archetype": "Depth"
+          "archetype": "Floor Spacer"
         },
         {
           "round": 6,
           "name": "Patrick Boutilier",
           "team_code": "Green Wave",
-          "archetype": "Depth"
+          "archetype": "Ball Mover"
         },
         {
           "round": 7,
           "name": "Colin Ryan",
           "team_code": "Red Storm",
-          "archetype": "Glass Work"
+          "archetype": "Picks His Spots"
         },
         {
           "round": 8,
           "name": "Allen Bellantoni",
           "team_code": "Knicks",
-          "archetype": "Depth"
+          "archetype": "Glass Work"
         }
       ]
     },
@@ -1742,7 +1742,7 @@
           "round": 1,
           "name": "Ryan Florentine",
           "team_code": "Huskies",
-          "archetype": "Scorer / Defender"
+          "archetype": "Disruptor / Floor Spacer"
         },
         {
           "round": 2,
@@ -1754,13 +1754,13 @@
           "round": 3,
           "name": "Enrique Rivera",
           "team_code": "Green Wave",
-          "archetype": "Winner"
+          "archetype": "Sure Hands / Clean Defender"
         },
         {
           "round": 4,
           "name": "Jeremy Staub",
           "team_code": "Knicks",
-          "archetype": "Depth"
+          "archetype": "Picks His Spots"
         },
         {
           "round": 5,
@@ -1772,19 +1772,19 @@
           "round": 6,
           "name": "Jay Canth",
           "team_code": "Black Mamba",
-          "archetype": "Depth"
+          "archetype": "Plus Minutes"
         },
         {
           "round": 7,
           "name": "Doug Brackney",
           "team_code": "Red Storm",
-          "archetype": "Depth"
+          "archetype": "Glass Work"
         },
         {
           "round": 8,
           "name": "Chris Cordeiro",
           "team_code": "Bulldogs",
-          "archetype": "Depth"
+          "archetype": "Clean Defender"
         }
       ]
     },
@@ -1809,19 +1809,19 @@
           "round": 3,
           "name": "Khalid Jabarkhail",
           "team_code": "Bulldogs",
-          "archetype": "Scorer / Defender"
+          "archetype": "Floor Spacer / Scorer"
         },
         {
           "round": 4,
           "name": "Scott Edmond",
           "team_code": "Knicks",
-          "archetype": "Defender"
+          "archetype": "Rim Protector / Defender"
         },
         {
           "round": 5,
           "name": "Dan Greif",
           "team_code": "Black Mamba",
-          "archetype": "Glass Work"
+          "archetype": "Pickpocket"
         },
         {
           "round": 6,
@@ -1833,13 +1833,13 @@
           "round": 7,
           "name": "Blake Walker",
           "team_code": "Bulldogs",
-          "archetype": "Depth"
+          "archetype": "Ball Mover"
         },
         {
           "round": 8,
           "name": "Mike Oberempt",
           "team_code": "Red Storm",
-          "archetype": "Depth"
+          "archetype": "Clean Defender"
         }
       ]
     },
@@ -1876,19 +1876,19 @@
           "round": 5,
           "name": "Josh Carter",
           "team_code": "Huskies",
-          "archetype": "Depth"
+          "archetype": "Sure Hands / Clean Defender"
         },
         {
           "round": 6,
           "name": "Alex Hetherington",
           "team_code": "Knicks",
-          "archetype": "Depth"
+          "archetype": "Picks His Spots"
         },
         {
           "round": 7,
           "name": "Devin Ye",
           "team_code": "Green Wave",
-          "archetype": "Depth"
+          "archetype": "Plus Minutes"
         },
         {
           "round": 8,
@@ -1907,7 +1907,7 @@
           "round": 1,
           "name": "Taylor Houghton",
           "team_code": "Knicks",
-          "archetype": "Scorer / Defender"
+          "archetype": "Disruptor / Rim Protector"
         },
         {
           "round": 2,
@@ -1919,7 +1919,7 @@
           "round": 3,
           "name": "Dan Gardner",
           "team_code": "Red Storm",
-          "archetype": "Glass Work"
+          "archetype": "Ball Mover"
         },
         {
           "round": 4,
@@ -1931,25 +1931,25 @@
           "round": 5,
           "name": "Joe Flaherty",
           "team_code": "Bulldogs",
-          "archetype": "Depth"
+          "archetype": "Clean Defender"
         },
         {
           "round": 6,
           "name": "Anthoni Reyes",
           "team_code": "Bulldogs",
-          "archetype": "Depth"
+          "archetype": "Pickpocket"
         },
         {
           "round": 7,
           "name": "Mike Rothstein",
           "team_code": "Huskies",
-          "archetype": "Depth"
+          "archetype": "Glass Work"
         },
         {
           "round": 8,
           "name": "Josh Levinson",
           "team_code": "Black Mamba",
-          "archetype": "Depth"
+          "archetype": "Clean Defender"
         }
       ]
     },
@@ -1962,7 +1962,7 @@
           "round": 1,
           "name": "Jimmy Giorlamo",
           "team_code": "Green Wave",
-          "archetype": "Scorer / Playmaker"
+          "archetype": "Pickpocket / Floor Spacer"
         },
         {
           "round": 2,
@@ -1974,13 +1974,13 @@
           "round": 3,
           "name": "Scott Houghton",
           "team_code": "Huskies",
-          "archetype": "Complementary Scorer"
+          "archetype": "Sure Hands / Clean Defender"
         },
         {
           "round": 4,
           "name": "Mason Carey",
           "team_code": "Bulldogs",
-          "archetype": "Rebounder"
+          "archetype": "Rebounder / Iron Man"
         },
         {
           "round": 5,
@@ -1992,19 +1992,19 @@
           "round": 6,
           "name": "James Holt",
           "team_code": "Red Storm",
-          "archetype": "Depth"
+          "archetype": "Clean Defender"
         },
         {
           "round": 7,
           "name": "Justin Rozen",
           "team_code": "Black Mamba",
-          "archetype": "Depth"
+          "archetype": "Shot Blocker"
         },
         {
           "round": 8,
           "name": "Randy Howe",
           "team_code": "Knicks",
-          "archetype": "Depth"
+          "archetype": "Shot Blocker"
         }
       ]
     }
