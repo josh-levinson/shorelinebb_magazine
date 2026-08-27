@@ -1,0 +1,452 @@
+[
+  {
+    "event_id": "3717993",
+    "date": "Wed Aug 26, 2026",
+    "time": "8:00 PM - 8:45 PM",
+    "ts": 1787796000,
+    "location": "East Shoreline Catholic Academy",
+    "home": {
+      "team_id": 852782,
+      "name": "Huskies",
+      "score": 50
+    },
+    "away": {
+      "team_id": 852783,
+      "name": "Knicks",
+      "score": 47
+    },
+    "final": true
+  },
+  {
+    "event_id": "3717992",
+    "date": "Wed Aug 26, 2026",
+    "time": "7:00 PM - 7:45 PM",
+    "ts": 1787792400,
+    "location": "East Shoreline Catholic Academy",
+    "home": {
+      "team_id": 890772,
+      "name": "Green Wave",
+      "score": 63
+    },
+    "away": {
+      "team_id": 852784,
+      "name": "Black Mamba",
+      "score": 59
+    },
+    "final": true
+  },
+  {
+    "event_id": "3717991",
+    "date": "Wed Aug 26, 2026",
+    "time": "6:00 PM - 6:45 PM",
+    "ts": 1787788800,
+    "location": "East Shoreline Catholic Academy",
+    "home": {
+      "team_id": 852780,
+      "name": "Red Storm",
+      "score": 64
+    },
+    "away": {
+      "team_id": 852781,
+      "name": "Bulldogs",
+      "score": 54
+    },
+    "final": true
+  },
+  {
+    "event_id": "3718002",
+    "date": "Wed Aug 19, 2026",
+    "time": "8:00 PM - 8:45 PM",
+    "ts": 1787191200,
+    "location": "East Shoreline Catholic Academy",
+    "home": {
+      "team_id": 852784,
+      "name": "Black Mamba",
+      "score": 62
+    },
+    "away": {
+      "team_id": 852780,
+      "name": "Red Storm",
+      "score": 78
+    },
+    "final": true
+  },
+  {
+    "event_id": "3718001",
+    "date": "Wed Aug 19, 2026",
+    "time": "7:00 PM - 7:45 PM",
+    "ts": 1787187600,
+    "location": "East Shoreline Catholic Academy",
+    "home": {
+      "team_id": 890772,
+      "name": "Green Wave",
+      "score": 54
+    },
+    "away": {
+      "team_id": 852783,
+      "name": "Knicks",
+      "score": 44
+    },
+    "final": true
+  },
+  {
+    "event_id": "3718000",
+    "date": "Wed Aug 19, 2026",
+    "time": "6:00 PM - 6:45 PM",
+    "ts": 1787184000,
+    "location": "East Shoreline Catholic Academy",
+    "home": {
+      "team_id": 852782,
+      "name": "Huskies",
+      "score": 55
+    },
+    "away": {
+      "team_id": 852781,
+      "name": "Bulldogs",
+      "score": 45
+    },
+    "final": true
+  },
+  {
+    "event_id": "3717999",
+    "date": "Wed Aug 12, 2026",
+    "time": "8:00 PM - 8:45 PM",
+    "ts": 1786586400,
+    "location": "East Shoreline Catholic Academy",
+    "home": {
+      "team_id": 852783,
+      "name": "Knicks",
+      "score": 44
+    },
+    "away": {
+      "team_id": 852781,
+      "name": "Bulldogs",
+      "score": 42
+    },
+    "final": true
+  },
+  {
+    "event_id": "3717998",
+    "date": "Wed Aug 12, 2026",
+    "time": "7:00 PM - 7:45 PM",
+    "ts": 1786582800,
+    "location": "East Shoreline Catholic Academy",
+    "home": {
+      "team_id": 852780,
+      "name": "Red Storm",
+      "score": 37
+    },
+    "away": {
+      "team_id": 890772,
+      "name": "Green Wave",
+      "score": 47
+    },
+    "final": true
+  },
+  {
+    "event_id": "3717997",
+    "date": "Wed Aug 12, 2026",
+    "time": "6:00 PM - 6:45 PM",
+    "ts": 1786579200,
+    "location": "East Shoreline Catholic Academy",
+    "home": {
+      "team_id": 852784,
+      "name": "Black Mamba",
+      "score": 63
+    },
+    "away": {
+      "team_id": 852782,
+      "name": "Huskies",
+      "score": 51
+    },
+    "final": true
+  },
+  {
+    "event_id": "3717996",
+    "date": "Wed Aug 5, 2026",
+    "time": "8:00 PM - 8:45 PM",
+    "ts": 1785981600,
+    "location": "East Shoreline Catholic Academy",
+    "home": {
+      "team_id": 852783,
+      "name": "Knicks",
+      "score": 56
+    },
+    "away": {
+      "team_id": 852784,
+      "name": "Black Mamba",
+      "score": 44
+    },
+    "final": true
+  },
+  {
+    "event_id": "3717995",
+    "date": "Wed Aug 5, 2026",
+    "time": "7:00 PM - 7:45 PM",
+    "ts": 1785978000,
+    "location": "East Shoreline Catholic Academy",
+    "home": {
+      "team_id": 852782,
+      "name": "Huskies",
+      "score": 61
+    },
+    "away": {
+      "team_id": 852780,
+      "name": "Red Storm",
+      "score": 44
+    },
+    "final": true
+  },
+  {
+    "event_id": "3717994",
+    "date": "Wed Aug 5, 2026",
+    "time": "6:00 PM - 6:45 PM",
+    "ts": 1785974400,
+    "location": "East Shoreline Catholic Academy",
+    "home": {
+      "team_id": 852781,
+      "name": "Bulldogs",
+      "score": 45
+    },
+    "away": {
+      "team_id": 890772,
+      "name": "Green Wave",
+      "score": 65
+    },
+    "final": true
+  },
+  {
+    "event_id": "3717990",
+    "date": "Wed Jul 22, 2026",
+    "time": "8:00 PM - 8:45 PM",
+    "ts": 1784772000,
+    "location": "East Shoreline Catholic Academy",
+    "home": {
+      "team_id": 852783,
+      "name": "Knicks",
+      "score": 0
+    },
+    "away": {
+      "team_id": 852780,
+      "name": "Red Storm",
+      "score": 2
+    },
+    "final": true
+  },
+  {
+    "event_id": "3717989",
+    "date": "Wed Jul 22, 2026",
+    "time": "7:00 PM - 7:45 PM",
+    "ts": 1784768400,
+    "location": "East Shoreline Catholic Academy",
+    "home": {
+      "team_id": 852784,
+      "name": "Black Mamba",
+      "score": 52
+    },
+    "away": {
+      "team_id": 852781,
+      "name": "Bulldogs",
+      "score": 47
+    },
+    "final": true
+  },
+  {
+    "event_id": "3717988",
+    "date": "Wed Jul 22, 2026",
+    "time": "6:00 PM - 6:45 PM",
+    "ts": 1784764800,
+    "location": "East Shoreline Catholic Academy",
+    "home": {
+      "team_id": 890772,
+      "name": "Green Wave",
+      "score": 47
+    },
+    "away": {
+      "team_id": 852782,
+      "name": "Huskies",
+      "score": 57
+    },
+    "final": true
+  },
+  {
+    "event_id": "3717987",
+    "date": "Wed Jul 15, 2026",
+    "time": "8:00 PM - 8:45 PM",
+    "ts": 1784167200,
+    "location": "East Shoreline Catholic Academy",
+    "home": {
+      "team_id": 852780,
+      "name": "Red Storm",
+      "score": 50
+    },
+    "away": {
+      "team_id": 852784,
+      "name": "Black Mamba",
+      "score": 53
+    },
+    "final": true
+  },
+  {
+    "event_id": "3717986",
+    "date": "Wed Jul 15, 2026",
+    "time": "7:00 PM - 7:45 PM",
+    "ts": 1784163600,
+    "location": "East Shoreline Catholic Academy",
+    "home": {
+      "team_id": 852781,
+      "name": "Bulldogs",
+      "score": 43
+    },
+    "away": {
+      "team_id": 852782,
+      "name": "Huskies",
+      "score": 51
+    },
+    "final": true
+  },
+  {
+    "event_id": "3717985",
+    "date": "Wed Jul 15, 2026",
+    "time": "6:00 PM - 6:45 PM",
+    "ts": 1784160000,
+    "location": "East Shoreline Catholic Academy",
+    "home": {
+      "team_id": 852783,
+      "name": "Knicks",
+      "score": 36
+    },
+    "away": {
+      "team_id": 890772,
+      "name": "Green Wave",
+      "score": 59
+    },
+    "final": true
+  },
+  {
+    "event_id": "3717984",
+    "date": "Wed Jul 8, 2026",
+    "time": "8:00 PM - 8:45 PM",
+    "ts": 1783562400,
+    "location": "East Shoreline Catholic Academy",
+    "home": {
+      "team_id": 852781,
+      "name": "Bulldogs",
+      "score": 53
+    },
+    "away": {
+      "team_id": 852783,
+      "name": "Knicks",
+      "score": 60
+    },
+    "final": true
+  },
+  {
+    "event_id": "3717983",
+    "date": "Wed Jul 8, 2026",
+    "time": "7:00 PM - 7:45 PM",
+    "ts": 1783558800,
+    "location": "East Shoreline Catholic Academy",
+    "home": {
+      "team_id": 890772,
+      "name": "Green Wave",
+      "score": 52
+    },
+    "away": {
+      "team_id": 852780,
+      "name": "Red Storm",
+      "score": 51
+    },
+    "final": true
+  },
+  {
+    "event_id": "3717982",
+    "date": "Wed Jul 8, 2026",
+    "time": "6:00 PM - 6:45 PM",
+    "ts": 1783555200,
+    "location": "East Shoreline Catholic Academy",
+    "home": {
+      "team_id": 852782,
+      "name": "Huskies",
+      "score": 49
+    },
+    "away": {
+      "team_id": 852784,
+      "name": "Black Mamba",
+      "score": 36
+    },
+    "final": true
+  },
+  {
+    "event_id": "3717981",
+    "date": "Wed Jul 1, 2026",
+    "time": "8:00 PM - 8:45 PM",
+    "ts": 1782957600,
+    "location": "East Shoreline Catholic Academy",
+    "home": {
+      "team_id": 890772,
+      "name": "Green Wave",
+      "score": 61
+    },
+    "away": {
+      "team_id": 852781,
+      "name": "Bulldogs",
+      "score": 40
+    },
+    "final": true
+  },
+  {
+    "event_id": "3717980",
+    "date": "Wed Jul 1, 2026",
+    "time": "7:00 PM - 7:45 PM",
+    "ts": 1782954000,
+    "location": "East Shoreline Catholic Academy",
+    "home": {
+      "team_id": 852784,
+      "name": "Black Mamba",
+      "score": 47
+    },
+    "away": {
+      "team_id": 852783,
+      "name": "Knicks",
+      "score": 53
+    },
+    "final": true
+  },
+  {
+    "event_id": "3717979",
+    "date": "Wed Jul 1, 2026",
+    "time": "6:00 PM - 6:45 PM",
+    "ts": 1782950400,
+    "location": "East Shoreline Catholic Academy",
+    "home": {
+      "team_id": 852780,
+      "name": "Red Storm",
+      "score": 64
+    },
+    "away": {
+      "team_id": 852782,
+      "name": "Huskies",
+      "score": 46
+    },
+    "final": true
+  },
+  {
+    "event_id": "3717976",
+    "date": "Wed Jun 24, 2026",
+    "time": "8:00 PM - 8:45 PM",
+    "ts": 1782352800,
+    "location": "East Shoreline Catholic Academy",
+    "home": {
+      "team_id": 852784,
+      "name": "Black Mamba",
+      "score": 0
+    },
+    "away": {
+      "team_id": 890772,
+      "name": "Green Wave",
+      "score": 2
+    },
+    "final": true
+  }
+]

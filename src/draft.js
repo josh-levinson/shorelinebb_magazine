@@ -224,15 +224,24 @@ raw.forEach((p, i) => (p.rank = i + 1));
 // from folding in deflections and Net PPP (roughly -8..+10 now, vs. the old
 // seven-category model's -4..+8) — re-tune them if the category set or
 // weights change again and the curve's gaps drift from these breaks.
-const TIER_NAMES = ["Franchise", "Core Starter", "Starter", "Rotation", "Bench", "Depth"];
+//
+// One exception to the gap rule: the Starter/Rotation break at 0.5 is a size
+// cut, not a gap cut. The middle of the board is genuinely smooth — no gap
+// there exceeds ~0.35 — so a single tier across it would swallow a third of
+// the pool and say nothing useful about any of them. Splitting on size keeps
+// the tiers legible; don't go looking for the natural seam it implies.
+const TIER_NAMES = [
+  "MVP", "All-Star", "Core Starter", "Starter", "Rotation", "Bench", "Depth",
+];
 const tierOf = (p) => {
   const v = p.value;
   if (v >= 8.0) return 0;
   if (v >= 4.0) return 1;
   if (v >= 1.8) return 2;
-  if (v >= -1.0) return 3;
-  if (v >= -4.6) return 4;
-  return 5;
+  if (v >= 0.5) return 3;
+  if (v >= -0.6) return 4;
+  if (v >= -4.0) return 5;
+  return 6;
 };
 for (const p of raw) p.tier = tierOf(p);
 

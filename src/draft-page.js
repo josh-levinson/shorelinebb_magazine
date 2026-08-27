@@ -116,6 +116,23 @@ for (const [key, label] of Object.entries(LBL_EXTRA)) {
   }
 }
 
+// The value curve and tier bands color each tier by index into TIER_COLORS in
+// the template. The template is last week's board, so a tier added since it was
+// generated would index past the end of that array and paint bars and legend
+// swatches with fill="undefined". Rebuild the array to the current tier count
+// from the full ramp: accent through rule, brightest tier first, all of them
+// theme-aware variables the page already defines. Trailing tiers reuse the
+// dimmest value if the tier count ever outgrows the ramp.
+const TIER_RAMP = [
+  "var(--accent)", "var(--accent-2)", "var(--full)", "var(--part)",
+  "var(--ink-3)", "var(--ink-2)", "var(--rule)",
+];
+replace("tier colors", /const TIER_COLORS = \[[^\]]*\];/, () => {
+  const cols = Array.from({ length: draft.tier_names.length }, (_v, i) =>
+    TIER_RAMP[i] ?? TIER_RAMP[TIER_RAMP.length - 1]);
+  return `const TIER_COLORS = [${cols.map((c) => `"${c}"`).join(",")}];`;
+});
+
 // ---- editorial lines --------------------------------------------------------
 // Rewrite these when the shape of the top of the board changes.
 const t = players;
